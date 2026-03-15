@@ -114,7 +114,7 @@
       align-items: center;
       gap: 8px;
     }
-    .nav-logo span { color: var(--amber); }
+    .nav-logo span { color: var(--text); }
     .nav-logo .logo-icon {
       width: 32px; height: 32px;
       background: var(--amber);
@@ -766,8 +766,11 @@
       font-size: 20px;
       color: var(--text);
       text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .footer-logo span { color: var(--amber); }
+    .footer-logo span { color: var(--text); }
     .footer-links {
       display: flex;
       gap: 24px;
@@ -1320,22 +1323,6 @@
         <p class="reveal reveal-delay-2">
           Download HappyMaps and see where tonight is happening in your city.
         </p>
-        <div class="download-btns reveal reveal-delay-3">
-          <a href="#" class="store-btn amber">
-            <span class="store-icon">🍎</span>
-            <div class="store-text">
-              <span class="top">Download on the</span>
-              <span class="btm">App Store</span>
-            </div>
-          </a>
-          <a href="#" class="store-btn">
-            <span class="store-icon">▶</span>
-            <div class="store-text">
-              <span class="top">Get it on</span>
-              <span class="btm">Google Play</span>
-            </div>
-          </a>
-        </div>
       </div>
     </div>
   </section>
@@ -1343,7 +1330,7 @@
   <!-- ── FOOTER ── -->
   <footer>
     <div class="container footer-inner">
-      <a href="#" class="footer-logo">Happy<span>Maps</span></a>
+      <a href="#" class="footer-logo"><img src="assets/images/HappyMapsAppIcon.png" style="width:32px;height:32px;border-radius:9px;display:block;">Happy<span>Maps</span></a>
       <ul class="footer-links">
         <li><a href="/privacy-policy">Privacy</a></li>
         <li><a href="/terms-of-service">Terms</a></li>
