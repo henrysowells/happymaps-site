@@ -8,856 +8,608 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ─────────────────────────────────────────
+       RESET
+    ───────────────────────────────────────── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+      min-width: 0;
+    }
 
-    :root {
-      --amber: #FFB300;
-      --amber-dim: #CC8F00;
-      --amber-glow: rgba(255, 179, 0, 0.18);
-      --amber-glow-strong: rgba(255, 179, 0, 0.35);
-      --bg: #080808;
-      --surface: #111111;
-      --surface-2: #161616;
-      --border: rgba(255,255,255,0.07);
-      --text: #F5F5F5;
-      --text-2: #999999;
-      --text-3: #555555;
-      --radius-lg: 24px;
-      --radius-xl: 40px;
+    html, body {
+      overflow-x: hidden;
+      max-width: 100vw;
     }
 
     html { scroll-behavior: smooth; }
 
+    img { max-width: 100%; display: block; }
+
+    /* ─────────────────────────────────────────
+       TOKENS
+    ───────────────────────────────────────── */
+    :root {
+      --amber:        #FFB800;
+      --amber-glow:   rgba(255,184,0,0.15);
+      --amber-strong: rgba(255,184,0,0.35);
+      --bg:      #080808;
+      --surface: #111111;
+      --border:  rgba(255,255,255,0.07);
+      --text:    #F5F5F5;
+      --text-2:  #999999;
+      --text-3:  #555555;
+      --r-lg: 20px;
+    }
+
+    /* ─────────────────────────────────────────
+       BASE — mobile first (390 px)
+    ───────────────────────────────────────── */
     body {
       font-family: 'DM Sans', sans-serif;
       background: var(--bg);
       color: var(--text);
-      overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ── Noise texture overlay ── */
+    /* noise grain */
     body::before {
       content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
-      opacity: 0.022;
-      pointer-events: none;
-      z-index: 9999;
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.022; pointer-events: none; z-index: 9999;
     }
 
-    /* ── Typography ── */
-    h1, h2, h3, h4 { font-family: 'DM Sans', sans-serif; line-height: 1.1; }
+    h1,h2,h3,h4 { line-height: 1.1; }
 
-    .label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--amber);
-    }
-
-    /* ── Layout helpers ── */
-    .container {
-      max-width: 1160px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
+    /* ─── layout ─── */
+    .container { width: 100%; padding: 0 20px; margin: 0 auto; }
     section { position: relative; }
 
-    /* ── Scroll reveal ── */
-    .reveal {
-      opacity: 0;
-      transform: translateY(32px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-    }
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .reveal-delay-1 { transition-delay: 0.1s; }
-    .reveal-delay-2 { transition-delay: 0.2s; }
-    .reveal-delay-3 { transition-delay: 0.3s; }
-    .reveal-delay-4 { transition-delay: 0.4s; }
-    .reveal-delay-5 { transition-delay: 0.5s; }
-
-    /* ══════════════════════════
-       NAV
-    ══════════════════════════ */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      padding: 20px 0;
-      transition: background 0.3s, backdrop-filter 0.3s, border-color 0.3s;
-    }
-    nav.scrolled {
-      background: rgba(8, 8, 8, 0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-    }
-    nav .nav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .nav-logo {
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 800;
-      font-size: 22px;
-      color: var(--text);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .nav-logo span { color: var(--text); }
-    .nav-logo .logo-icon {
-      width: 32px; height: 32px;
-      background: var(--amber);
-      border-radius: 9px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-    }
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 32px;
-      list-style: none;
-    }
-    .nav-links a {
-      color: var(--text-2);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-    .nav-links a:hover { color: var(--text); }
-    .btn-nav {
-      background: var(--amber);
-      color: #000;
-      padding: 10px 22px;
-      border-radius: 100px;
-      font-weight: 600;
-      font-size: 14px;
-      text-decoration: none;
-      transition: background 0.2s, transform 0.15s;
+    /* ─── typography helpers ─── */
+    .label {
       display: inline-block;
-    }
-    .btn-nav:hover { background: #ffc533; transform: translateY(-1px); }
-    @media (max-width: 640px) { .nav-links { display: none; } }
-
-    /* ══════════════════════════
-       HERO
-    ══════════════════════════ */
-    #hero {
-      min-height: 100svh;
-      display: flex;
-      align-items: center;
-      padding: 120px 0 80px;
-      overflow: hidden;
-    }
-
-    /* Ambient glow blobs */
-    #hero::before, #hero::after {
-      content: '';
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(120px);
-      pointer-events: none;
-    }
-    #hero::before {
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(255,179,0,0.14) 0%, transparent 70%);
-      top: -100px; right: -100px;
-    }
-    #hero::after {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(255,179,0,0.08) 0%, transparent 70%);
-      bottom: 0; left: -50px;
-    }
-
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 60px;
-      align-items: center;
-    }
-    @media (max-width: 900px) {
-      .hero-grid { grid-template-columns: 1fr; text-align: center; }
-      .hero-phones { justify-content: center; }
-      .hero-ctas { justify-content: center; }
-    }
-
-    .hero-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--amber-glow);
-      border: 1px solid rgba(255,179,0,0.3);
-      padding: 6px 14px;
-      border-radius: 100px;
-      margin-bottom: 24px;
-      animation: fadeInDown 0.6s ease both;
-    }
-    .hero-eyebrow .dot {
-      width: 6px; height: 6px;
-      background: var(--amber);
-      border-radius: 50%;
-      animation: pulse 2s ease-in-out infinite;
-    }
-    .hero-eyebrow span {
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
       color: var(--amber);
-      letter-spacing: 0.06em;
     }
-
-    .hero-title {
-      font-size: clamp(52px, 7vw, 88px);
-      font-weight: 800;
-      line-height: 1.0;
-      letter-spacing: -0.03em;
-      margin-bottom: 24px;
-      animation: fadeInUp 0.7s 0.1s ease both;
+    .accent { color: var(--amber); }
+    .divider {
+      width: 44px; height: 3px;
+      background: var(--amber); border-radius: 2px;
+      margin: 10px auto 18px;
     }
-    .hero-title .accent { color: var(--amber); }
-
-    .hero-sub {
-      font-size: clamp(16px, 2vw, 19px);
-      color: var(--text-2);
-      line-height: 1.6;
-      max-width: 480px;
+    .section-header {
+      text-align: center;
       margin-bottom: 40px;
-      font-weight: 400;
-      animation: fadeInUp 0.7s 0.2s ease both;
     }
-    @media (max-width: 900px) { .hero-sub { margin: 0 auto 40px; } }
-
-    .hero-ctas {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      animation: fadeInUp 0.7s 0.3s ease both;
+    .section-header h2 {
+      font-size: 28px; font-weight: 800;
+      letter-spacing: -0.03em; margin-bottom: 10px;
     }
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--amber);
-      color: #000;
-      padding: 16px 28px;
-      border-radius: 100px;
-      font-weight: 700;
-      font-size: 15px;
-      text-decoration: none;
-      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-      box-shadow: 0 0 40px var(--amber-glow-strong);
-    }
-    .btn-primary:hover {
-      background: #ffc533;
-      transform: translateY(-2px);
-      box-shadow: 0 0 60px rgba(255,179,0,0.45);
-    }
-    .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: transparent;
-      color: var(--text);
-      padding: 16px 28px;
-      border-radius: 100px;
-      font-weight: 600;
-      font-size: 15px;
-      text-decoration: none;
-      border: 1px solid var(--border);
-      transition: border-color 0.2s, transform 0.15s, background 0.2s;
-    }
-    .btn-secondary:hover {
-      border-color: rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.04);
-      transform: translateY(-2px);
-    }
-    .btn-icon { font-size: 18px; }
-
-    /* Hero phone mockup */
-    .hero-phones {
-      display: flex;
-      align-items: flex-end;
-      gap: -20px;
-      position: relative;
-      animation: fadeInUp 0.8s 0.2s ease both;
-    }
-    .hero-phone-wrap {
-      position: relative;
-      animation: float 6s ease-in-out infinite;
-    }
-    .hero-phone-wrap.back {
-      transform: translateX(30px) rotate(-6deg) scale(0.9);
-      opacity: 0.6;
-      animation: floatBack 6s 1s ease-in-out infinite;
-      z-index: 0;
-      filter: blur(0.5px);
-    }
-    .hero-phone-wrap.front {
-      z-index: 1;
-      transform: rotate(3deg);
+    .section-header p {
+      font-size: 15px; color: var(--text-2);
+      line-height: 1.6; max-width: 480px; margin: 0 auto;
     }
 
-    /* ══════════════════════════
-       PHONE FRAME
-    ══════════════════════════ */
+    /* ─── scroll reveal ─── */
+    .reveal {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      will-change: opacity, transform;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .d1 { transition-delay: 0.1s; }
+    .d2 { transition-delay: 0.2s; }
+    .d3 { transition-delay: 0.3s; }
+    .d4 { transition-delay: 0.4s; }
+    .d5 { transition-delay: 0.5s; }
+
+    /* ─── phone frame ─── */
     .phone-frame {
-      width: 260px;
-      border-radius: 46px;
+      width: 100%;
+      border-radius: 38px;
       background: #0a0a0a;
-      border: 7px solid #1e1e1e;
+      border: 6px solid #1e1e1e;
       box-shadow:
         0 0 0 1px #2a2a2a,
-        0 50px 100px rgba(0,0,0,0.7),
-        0 0 80px rgba(255,179,0,0.08),
+        0 40px 80px rgba(0,0,0,0.7),
+        0 0 60px rgba(255,184,0,0.07),
         inset 0 0 0 1px rgba(255,255,255,0.04);
       position: relative;
       overflow: hidden;
     }
-    .phone-frame.sm { width: 200px; border-radius: 36px; border-width: 6px; }
-    .phone-frame.lg { width: 300px; border-radius: 52px; border-width: 8px; }
-    .phone-frame-notch {
-      position: absolute;
-      top: 0; left: 50%;
+    .phone-frame img,
+    .phone-frame svg { width: 100%; display: block; }
+    .phone-notch {
+      position: absolute; top: 0; left: 50%;
       transform: translateX(-50%);
-      width: 110px; height: 28px;
+      width: 96px; height: 24px;
       background: #0a0a0a;
-      border-radius: 0 0 22px 22px;
+      border-radius: 0 0 18px 18px;
       z-index: 10;
     }
-    .phone-frame img {
-      width: 100%;
-      display: block;
-      border-radius: 38px;
-    }
-    .phone-frame.sm img { border-radius: 28px; }
-    .phone-frame.lg img { border-radius: 43px; }
 
-    /* ══════════════════════════
-       STATS BAR
-    ══════════════════════════ */
+    /* ─── buttons ─── */
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--amber); color: #000;
+      padding: 14px 24px; border-radius: 100px;
+      font-weight: 700; font-size: 15px; text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 0 40px var(--amber-strong);
+    }
+    .btn-primary:hover { background: #ffc533; transform: translateY(-2px); }
+
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; color: var(--text);
+      padding: 14px 24px; border-radius: 100px;
+      font-weight: 600; font-size: 15px; text-decoration: none;
+      border: 1px solid var(--border);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .btn-secondary:hover {
+      border-color: rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.04);
+    }
+
+    /* ═══════════════════════════════════════
+       NAV
+    ═══════════════════════════════════════ */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100; padding: 16px 0;
+      transition: background 0.3s, backdrop-filter 0.3s;
+    }
+    nav.scrolled {
+      background: rgba(8,8,8,0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex; align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 8px;
+      text-decoration: none;
+      font-weight: 800; font-size: 20px; color: var(--text);
+      flex-shrink: 0;
+    }
+    .nav-logo img { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; }
+    .nav-links {
+      display: none; /* shown on tablet+ */
+      align-items: center; gap: 28px; list-style: none;
+    }
+    .nav-links a {
+      color: var(--text-2); text-decoration: none;
+      font-size: 14px; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .btn-nav {
+      background: var(--amber); color: #000 !important;
+      padding: 9px 20px; border-radius: 100px;
+      font-weight: 600; font-size: 14px;
+      transition: background 0.2s;
+    }
+    .btn-nav:hover { background: #ffc533 !important; }
+
+    /* ═══════════════════════════════════════
+       HERO — single column, centered, mobile-first
+    ═══════════════════════════════════════ */
+    #hero {
+      padding: 108px 0 60px;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--amber-glow);
+      border: 1px solid rgba(255,184,0,0.3);
+      padding: 6px 14px; border-radius: 100px;
+      margin-bottom: 18px;
+    }
+    .hero-eyebrow .dot {
+      width: 6px; height: 6px;
+      background: var(--amber); border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .hero-eyebrow span {
+      font-size: 12px; font-weight: 600;
+      color: var(--amber); letter-spacing: 0.06em;
+    }
+
+    .hero-title {
+      font-size: 42px; font-weight: 800;
+      line-height: 1.0; letter-spacing: -0.03em;
+      margin-bottom: 18px;
+    }
+
+    .hero-sub {
+      font-size: 16px; color: var(--text-2);
+      line-height: 1.65; margin-bottom: 28px;
+      max-width: 320px; margin-left: auto; margin-right: auto;
+    }
+
+    .hero-ctas {
+      display: flex; gap: 10px;
+      justify-content: center; flex-wrap: wrap;
+      margin-bottom: 44px;
+    }
+
+    /* phone area */
+    .hero-phones {
+      display: flex; justify-content: center;
+      align-items: flex-end;
+    }
+    /* front phone: always visible, fluid width */
+    .hero-phone-front {
+      width: 80vw; max-width: 280px;
+      animation: floatPhone 6s ease-in-out infinite;
+      will-change: transform;
+    }
+    /* back phone: hidden until desktop */
+    .hero-phone-back { display: none; }
+
+    /* ═══════════════════════════════════════
+       STATS
+    ═══════════════════════════════════════ */
     #stats {
-      padding: 48px 0;
+      padding: 40px 0;
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
     }
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 24px;
-    }
-    @media (max-width: 640px) {
-      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
-    }
-    .stat-item { text-align: center; }
-    .stat-number {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 40px;
-      font-weight: 800;
-      color: var(--amber);
-      line-height: 1;
-      margin-bottom: 6px;
-      letter-spacing: -0.02em;
-    }
-    .stat-label {
-      font-size: 13px;
-      color: var(--text-2);
-      font-weight: 500;
-    }
-
-    /* ══════════════════════════
-       HOW IT WORKS
-    ══════════════════════════ */
-    #how-it-works { padding: 120px 0; }
-
-    .section-header {
+      grid-template-columns: 1fr 1fr;
+      gap: 28px 16px;
       text-align: center;
-      margin-bottom: 72px;
     }
-    .section-header h2 {
-      font-size: clamp(36px, 5vw, 56px);
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-bottom: 16px;
+    .stat-number {
+      font-size: 36px; font-weight: 800;
+      color: var(--amber); line-height: 1;
+      margin-bottom: 5px; letter-spacing: -0.02em;
     }
-    .section-header p {
-      font-size: 17px;
-      color: var(--text-2);
-      max-width: 520px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
+    .stat-label { font-size: 13px; color: var(--text-2); font-weight: 500; }
+
+    /* ═══════════════════════════════════════
+       HOW IT WORKS
+    ═══════════════════════════════════════ */
+    #how-it-works { padding: 64px 0; }
 
     .steps-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      position: relative;
+      display: grid; grid-template-columns: 1fr; gap: 14px;
     }
-    @media (max-width: 900px) {
-      .steps-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
-    }
-    @media (max-width: 540px) {
-      .steps-grid { grid-template-columns: 1fr; }
-    }
-
-    /* Connecting line between steps */
-    .steps-grid::before {
-      content: '';
-      position: absolute;
-      top: 40px;
-      left: calc(12.5% + 8px);
-      right: calc(12.5% + 8px);
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--amber), var(--amber), var(--amber), transparent);
-      opacity: 0.25;
-      pointer-events: none;
-    }
-    @media (max-width: 900px) { .steps-grid::before { display: none; } }
-
     .step-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 28px 24px;
-      transition: border-color 0.3s, transform 0.3s;
-    }
-    .step-card:hover {
-      border-color: rgba(255,179,0,0.3);
-      transform: translateY(-4px);
+      border-radius: var(--r-lg);
+      padding: 24px 20px; text-align: center;
     }
     .step-number {
-      width: 44px; height: 44px;
-      background: var(--amber);
-      color: #000;
+      width: 40px; height: 40px;
+      background: var(--amber); color: #000;
       border-radius: 50%;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 800;
-      font-size: 18px;
+      font-weight: 800; font-size: 17px;
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 20px;
+      margin: 0 auto 14px;
     }
-    .step-card h3 {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      letter-spacing: -0.01em;
-    }
-    .step-card p {
-      font-size: 14px;
-      color: var(--text-2);
-      line-height: 1.6;
-    }
+    .step-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.01em; }
+    .step-card > p { font-size: 14px; color: var(--text-2); line-height: 1.6; }
     .step-screenshot {
-      margin-top: 24px;
-      border-radius: 16px;
-      overflow: hidden;
-      border: 1px solid var(--border);
+      margin-top: 18px; border-radius: 12px;
+      overflow: hidden; border: 1px solid var(--border);
     }
-    .step-screenshot img {
-      width: 100%;
-      display: block;
-      transition: transform 0.5s ease;
-    }
-    .step-card:hover .step-screenshot img { transform: scale(1.03); }
+    .step-screenshot img { width: 100%; display: block; }
 
-    /* ══════════════════════════
+    /* ═══════════════════════════════════════
        FEATURES
-    ══════════════════════════ */
-    #features {
-      padding: 120px 0;
-      background: var(--surface);
-    }
-    #features::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,179,0,0.05) 0%, transparent 70%);
-      pointer-events: none;
-    }
+    ═══════════════════════════════════════ */
+    #features { padding: 64px 0; background: var(--surface); }
 
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-    @media (max-width: 900px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 540px) { .features-grid { grid-template-columns: 1fr; } }
+    .features-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
 
     .feature-card {
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 32px 28px;
-      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
-    }
-    .feature-card:hover {
-      border-color: rgba(255,179,0,0.25);
-      box-shadow: 0 0 40px rgba(255,179,0,0.06);
-      transform: translateY(-3px);
+      border-radius: var(--r-lg);
+      padding: 24px 20px; text-align: center;
+      transition: border-color 0.3s;
     }
     .feature-card.highlight {
-      background: linear-gradient(135deg, rgba(255,179,0,0.08) 0%, rgba(255,179,0,0.02) 100%);
-      border-color: rgba(255,179,0,0.3);
+      background: linear-gradient(135deg, rgba(255,184,0,0.08) 0%, rgba(255,184,0,0.02) 100%);
+      border-color: rgba(255,184,0,0.3);
     }
-    .feature-icon {
-      font-size: 32px;
-      margin-bottom: 20px;
-      display: block;
-    }
-    .feature-card h3 {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      letter-spacing: -0.01em;
-    }
-    .feature-card p {
-      font-size: 14px;
-      color: var(--text-2);
-      line-height: 1.65;
-    }
+    .feature-icon { font-size: 28px; display: block; margin-bottom: 12px; }
+    .feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.01em; }
+    .feature-card p { font-size: 14px; color: var(--text-2); line-height: 1.65; }
 
-    /* ══════════════════════════
-       SCREENSHOTS
-    ══════════════════════════ */
-    #screenshots { padding: 120px 0; overflow: hidden; }
+    /* ═══════════════════════════════════════
+       SCREENSHOTS — horizontal scroll
+    ═══════════════════════════════════════ */
+    #screenshots { padding: 64px 0; }
 
-    #screenshots::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse 60% 50% at 50% 100%, rgba(255,179,0,0.06) 0%, transparent 70%);
-      pointer-events: none;
+    .screenshots-scroll {
+      overflow-x: scroll;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      /* bleed to edges */
+      margin: 24px -20px 0;
+      padding: 16px 20px 32px;
+      cursor: grab;
     }
+    .screenshots-scroll::-webkit-scrollbar { display: none; }
+    .screenshots-scroll.dragging { cursor: grabbing; user-select: none; }
 
-    .screenshots-track-wrapper {
-      overflow: hidden;
-      margin: 0 -24px;
-      padding: 40px 24px;
-    }
     .screenshots-track {
-      display: flex;
-      gap: 32px;
+      display: flex; gap: 14px;
       align-items: flex-end;
       width: max-content;
     }
+
     .screenshot-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      cursor: default;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 10px;
     }
-    .screenshot-item .phone-frame {
-      transition: transform 0.4s ease, box-shadow 0.4s ease;
-    }
-    .screenshot-item:hover .phone-frame {
-      transform: translateY(-12px) scale(1.02);
-      box-shadow:
-        0 0 0 1px #2a2a2a,
-        0 60px 120px rgba(0,0,0,0.8),
-        0 0 100px rgba(255,179,0,0.15);
-    }
-    .screenshot-item.featured .phone-frame {
-      width: 280px;
-      transform: translateY(-20px);
-    }
-    .screenshot-item.featured:hover .phone-frame {
-      transform: translateY(-32px) scale(1.02);
-    }
+    /* constrained phone width inside scroll */
+    .screenshot-item .phone-frame { width: 190px; }
+    .screenshot-item.featured .phone-frame { width: 210px; }
+
     .screenshot-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-2);
-      text-align: center;
+      font-size: 12px; font-weight: 600;
+      color: var(--text-2); text-align: center;
     }
 
-    /* Horizontal drag scroll */
-    .screenshots-track-wrapper {
-      cursor: grab;
-    }
-    .screenshots-track-wrapper.dragging {
-      cursor: grabbing;
-      user-select: none;
-    }
-
-    /* ══════════════════════════
+    /* ═══════════════════════════════════════
        SOCIAL PROOF
-    ══════════════════════════ */
-    #social-proof {
-      padding: 120px 0;
-      background: var(--surface);
-    }
-    #social-proof::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255,179,0,0.04) 0%, transparent 70%);
-      pointer-events: none;
-    }
+    ═══════════════════════════════════════ */
+    #social-proof { padding: 64px 0; background: var(--surface); }
 
-    .proof-layout {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px;
-      align-items: center;
-    }
-    @media (max-width: 860px) {
-      .proof-layout { grid-template-columns: 1fr; gap: 60px; }
-      .proof-phones-stack { justify-content: center; }
-    }
+    /* phones column hidden on mobile */
+    .proof-phones-col { display: none; }
 
-    .proof-text .label { margin-bottom: 16px; display: block; }
+    .proof-text .label { margin-bottom: 12px; }
     .proof-text h2 {
-      font-size: clamp(34px, 4.5vw, 52px);
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-bottom: 24px;
-      line-height: 1.05;
+      font-size: 28px; font-weight: 800;
+      letter-spacing: -0.03em; margin-bottom: 14px; line-height: 1.1;
     }
-    .proof-text h2 em {
-      font-style: normal;
-      color: var(--amber);
-    }
-    .proof-text p {
-      font-size: 16px;
-      color: var(--text-2);
-      line-height: 1.7;
-      margin-bottom: 16px;
-    }
+    .proof-text h2 em { font-style: normal; color: var(--amber); }
+    .proof-text p { font-size: 15px; color: var(--text-2); line-height: 1.7; margin-bottom: 12px; }
 
     .proof-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 32px;
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-top: 22px; justify-content: center;
     }
     .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 16px;
-      border-radius: 100px;
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 8px 14px; border-radius: 100px;
       border: 1px solid var(--border);
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-2);
-      background: var(--bg);
-      transition: border-color 0.2s, color 0.2s;
+      font-size: 13px; font-weight: 500;
+      color: var(--text-2); background: var(--bg);
     }
-    .pill:hover {
-      border-color: rgba(255,179,0,0.3);
-      color: var(--text);
-    }
-    .pill .dot {
-      width: 6px; height: 6px;
-      background: var(--amber);
-      border-radius: 50%;
-    }
+    .pill .dot { width: 5px; height: 5px; background: var(--amber); border-radius: 50%; flex-shrink: 0; }
 
-    .proof-phones-stack {
-      display: flex;
-      gap: 16px;
-      align-items: flex-end;
-    }
-    .proof-phones-stack .phone-frame:first-child {
-      transform: translateY(20px);
-    }
-    .proof-phones-stack .phone-frame:last-child {
-      transform: translateY(0);
-    }
-
-    /* ══════════════════════════
+    /* ═══════════════════════════════════════
        DOWNLOAD CTA
-    ══════════════════════════ */
-    #download {
-      padding: 140px 0;
-      text-align: center;
-      overflow: hidden;
-    }
+    ═══════════════════════════════════════ */
+    #download { padding: 72px 0; text-align: center; overflow: hidden; }
     #download::before {
       content: '';
-      position: absolute;
-      width: 800px; height: 800px;
-      left: 50%; top: 50%;
-      transform: translate(-50%, -50%);
-      background: radial-gradient(circle, rgba(255,179,0,0.12) 0%, transparent 65%);
-      border-radius: 50%;
-      pointer-events: none;
+      position: absolute; width: 600px; height: 600px;
+      left: 50%; top: 50%; transform: translate(-50%,-50%);
+      background: radial-gradient(circle, rgba(255,184,0,0.10) 0%, transparent 65%);
+      border-radius: 50%; pointer-events: none;
     }
-
     .download-content { position: relative; }
-    .download-content .label { margin-bottom: 20px; display: block; }
+    .download-content .label { margin-bottom: 14px; }
     .download-content h2 {
-      font-size: clamp(40px, 6vw, 72px);
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      margin-bottom: 20px;
-      line-height: 1.0;
+      font-size: 36px; font-weight: 800;
+      letter-spacing: -0.04em; margin-bottom: 14px; line-height: 1.0;
     }
-    .download-content h2 .accent { color: var(--amber); }
-    .download-content p {
-      font-size: 18px;
-      color: var(--text-2);
-      max-width: 440px;
-      margin: 0 auto 48px;
-      line-height: 1.6;
+    .download-content > p {
+      font-size: 16px; color: var(--text-2);
+      margin-bottom: 32px; line-height: 1.6;
+      max-width: 360px; margin-left: auto; margin-right: auto;
     }
-
     .download-btns {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      flex-wrap: wrap;
+      display: flex; gap: 12px;
+      justify-content: center; flex-wrap: wrap;
     }
     .store-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 14px;
-      background: var(--text);
-      color: #000;
-      padding: 14px 28px;
-      border-radius: 16px;
+      display: inline-flex; align-items: center; gap: 12px;
+      background: var(--text); color: #000;
+      padding: 13px 22px; border-radius: 14px;
       text-decoration: none;
-      transition: transform 0.2s, box-shadow 0.2s;
-      min-width: 200px;
+      transition: transform 0.2s;
+      min-width: 160px;
     }
-    .store-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    }
-    .store-btn.amber {
-      background: var(--amber);
-      box-shadow: 0 0 60px var(--amber-glow-strong);
-    }
-    .store-btn.amber:hover { box-shadow: 0 20px 60px rgba(255,179,0,0.4); }
-    .store-icon { font-size: 28px; line-height: 1; }
+    .store-btn:hover { transform: translateY(-2px); }
+    .store-btn.amber { background: var(--amber); box-shadow: 0 0 50px var(--amber-strong); }
+    .store-icon { font-size: 26px; line-height: 1; flex-shrink: 0; }
     .store-text { text-align: left; }
-    .store-text span { display: block; }
-    .store-text .top { font-size: 11px; font-weight: 500; opacity: 0.7; }
-    .store-text .btm { font-size: 17px; font-weight: 700; }
+    .store-text .top { display: block; font-size: 10px; font-weight: 500; opacity: 0.7; }
+    .store-text .btm { display: block; font-size: 15px; font-weight: 700; }
 
-    /* ══════════════════════════
+    /* ═══════════════════════════════════════
        FOOTER
-    ══════════════════════════ */
-    footer {
-      padding: 48px 0;
-      border-top: 1px solid var(--border);
-    }
+    ═══════════════════════════════════════ */
+    footer { padding: 36px 0; border-top: 1px solid var(--border); }
     .footer-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      flex-wrap: wrap;
+      display: flex; flex-direction: column; gap: 18px;
     }
     .footer-logo {
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 800;
-      font-size: 20px;
-      color: var(--text);
+      display: flex; align-items: center; gap: 8px;
       text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      font-weight: 800; font-size: 18px; color: var(--text);
     }
-    .footer-logo span { color: var(--text); }
-    .footer-links {
-      display: flex;
-      gap: 24px;
-      list-style: none;
-    }
-    .footer-links a {
-      font-size: 13px;
-      color: var(--text-3);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
+    .footer-logo img { width: 28px; height: 28px; border-radius: 7px; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 14px 18px; list-style: none; }
+    .footer-links a { font-size: 13px; color: var(--text-3); text-decoration: none; transition: color 0.2s; }
     .footer-links a:hover { color: var(--text-2); }
-    .footer-copy {
-      font-size: 13px;
-      color: var(--text-3);
-    }
+    .footer-copy { font-size: 12px; color: var(--text-3); }
 
-    /* ══════════════════════════
+    /* ═══════════════════════════════════════
        ANIMATIONS
-    ══════════════════════════ */
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-12px); }
-      to   { opacity: 1; transform: translateY(0); }
+    ═══════════════════════════════════════ */
+    @keyframes floatPhone {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-12px); }
     }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes float {
+    @keyframes floatFront {
       0%, 100% { transform: rotate(3deg) translateY(0); }
       50%       { transform: rotate(3deg) translateY(-14px); }
     }
     @keyframes floatBack {
-      0%, 100% { transform: translateX(30px) rotate(-6deg) scale(0.9) translateY(0); }
-      50%       { transform: translateX(30px) rotate(-6deg) scale(0.9) translateY(-8px); }
+      0%, 100% { transform: rotate(-6deg) translateY(0); }
+      50%       { transform: rotate(-6deg) translateY(-8px); }
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
       50%       { opacity: 0.6; transform: scale(1.2); }
     }
-    @keyframes scrollIndicator {
-      0%, 100% { transform: translateY(0); opacity: 1; }
-      50%       { transform: translateY(6px); opacity: 0.4; }
+
+    /* ─────────────────────────────────────────
+       TABLET  768px+
+    ───────────────────────────────────────── */
+    @media (min-width: 768px) {
+      .container { max-width: 740px; padding: 0 24px; }
+
+      .section-header { margin-bottom: 52px; }
+      .section-header h2 { font-size: 38px; }
+
+      /* nav */
+      .nav-links { display: flex; }
+
+      /* hero */
+      #hero { padding: 128px 0 72px; }
+      .hero-title { font-size: 54px; }
+      .hero-sub { max-width: 400px; font-size: 17px; }
+
+      /* stats */
+      .stats-grid { grid-template-columns: repeat(4,1fr); gap: 16px; }
+
+      /* how it works */
+      #how-it-works { padding: 88px 0; }
+      .steps-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+
+      /* features */
+      #features { padding: 88px 0; }
+      .features-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+
+      /* screenshots */
+      #screenshots { padding: 88px 0; }
+      .screenshots-scroll { margin: 24px -24px 0; padding: 16px 24px 32px; }
+      .screenshot-item .phone-frame { width: 210px; }
+      .screenshot-item.featured .phone-frame { width: 235px; }
+
+      /* social proof */
+      #social-proof { padding: 88px 0; }
+      .proof-text h2 { font-size: 34px; }
+      .proof-pills { justify-content: flex-start; }
+
+      /* download */
+      #download { padding: 96px 0; }
+      .download-content h2 { font-size: 50px; }
+
+      /* footer */
+      .footer-inner { flex-direction: row; align-items: center; justify-content: space-between; }
     }
 
-    /* Scroll indicator */
-    .scroll-indicator {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      animation: fadeInUp 1s 0.8s ease both;
-      opacity: 0;
-    }
-    .scroll-indicator span {
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: var(--text-3);
-      text-transform: uppercase;
-    }
-    .scroll-mouse {
-      width: 24px; height: 38px;
-      border: 2px solid var(--text-3);
-      border-radius: 12px;
-      position: relative;
-    }
-    .scroll-mouse::before {
-      content: '';
-      position: absolute;
-      width: 4px; height: 8px;
-      background: var(--text-3);
-      border-radius: 2px;
-      top: 6px; left: 50%;
-      transform: translateX(-50%);
-      animation: scrollIndicator 1.8s ease-in-out infinite;
-    }
+    /* ─────────────────────────────────────────
+       DESKTOP  1024px+
+    ───────────────────────────────────────── */
+    @media (min-width: 1024px) {
+      .container { max-width: 1160px; padding: 0 24px; }
 
-    /* Section divider line */
-    .divider {
-      width: 60px; height: 3px;
-      background: var(--amber);
-      border-radius: 2px;
-      margin: 0 auto 24px;
+      .section-header h2 { font-size: 52px; }
+      .section-header { margin-bottom: 64px; }
+
+      /* ── hero: two-column layout ── */
+      #hero { padding: 140px 0 100px; text-align: left; }
+
+      .hero-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        align-items: center;
+      }
+      .hero-sub { margin-left: 0; margin-right: 0; max-width: 480px; font-size: 18px; }
+      .hero-ctas { justify-content: flex-start; }
+      .hero-eyebrow { display: inline-flex; }
+
+      /* phones: both visible, overlapping */
+      .hero-phones {
+        position: relative;
+        height: 520px;
+        justify-content: flex-end;
+      }
+      .hero-phone-front {
+        width: 260px; max-width: 260px;
+        position: absolute; right: 0; bottom: 0;
+        animation: floatFront 6s ease-in-out infinite;
+      }
+      .hero-phone-back {
+        display: block;
+        width: 230px;
+        position: absolute; right: 210px; bottom: 20px;
+        opacity: 0.6; filter: blur(0.5px);
+        animation: floatBack 6s 1s ease-in-out infinite;
+        will-change: transform;
+      }
+
+      /* steps */
+      #how-it-works { padding: 120px 0; }
+      .steps-grid { grid-template-columns: repeat(4,1fr); gap: 16px; }
+      .step-card { text-align: left; }
+      .step-number { margin: 0 0 14px; }
+
+      /* features */
+      #features { padding: 120px 0; }
+      .features-grid { grid-template-columns: repeat(3,1fr); gap: 16px; }
+      .feature-card { text-align: left; }
+
+      /* screenshots */
+      #screenshots { padding: 120px 0; }
+      .screenshots-scroll {
+        margin: 32px -24px 0;
+        padding: 20px 24px 40px;
+      }
+      .screenshot-item .phone-frame { width: 240px; }
+      .screenshot-item.featured .phone-frame { width: 280px; }
+
+      /* social proof: two-column */
+      #social-proof { padding: 120px 0; }
+      .proof-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 80px;
+        align-items: center;
+      }
+      .proof-phones-col {
+        display: flex;
+        gap: 16px;
+        align-items: flex-end;
+      }
+      .proof-phone {
+        flex: 1;
+      }
+      .proof-phone:first-child { transform: translateY(20px); }
+      .proof-text { text-align: left; }
+      .proof-pills { justify-content: flex-start; }
+      .proof-text h2 { font-size: 48px; }
+
+      /* download */
+      #download { padding: 140px 0; }
+      .download-content h2 { font-size: 68px; }
+
+      /* hover interactions */
+      .step-card:hover { border-color: rgba(255,184,0,0.3); transform: translateY(-4px); transition: border-color 0.3s, transform 0.3s; }
+      .feature-card:hover { border-color: rgba(255,184,0,0.25); box-shadow: 0 0 40px rgba(255,184,0,0.06); transform: translateY(-3px); transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s; }
     }
   </style>
 </head>
@@ -866,7 +618,10 @@
   <!-- ── NAV ── -->
   <nav id="nav">
     <div class="container nav-inner">
-      <a href="#" class="nav-logo"><img src="assets/images/HappyMapsAppIcon.png" style="width:32px;height:32px;border-radius:9px;display:block;"><span>HappyMaps</span></a>
+      <a href="#" class="nav-logo">
+        <img src="assets/images/HappyMapsAppIcon.png" alt="HappyMaps icon" />
+        <span>HappyMaps</span>
+      </a>
       <ul class="nav-links">
         <li><a href="#how-it-works">How it works</a></li>
         <li><a href="#features">Features</a></li>
@@ -879,10 +634,9 @@
   <!-- ── HERO ── -->
   <section id="hero">
     <div class="container">
-      <div class="hero-grid">
+      <div class="hero-layout">
 
-        <!-- Left: copy -->
-        <div class="hero-left">
+        <div class="hero-copy">
           <div class="hero-eyebrow">
             <div class="dot"></div>
             <span>Now available on iOS</span>
@@ -893,30 +647,32 @@
           <p class="hero-sub">
             HappyMaps is the social app for college students to discover bars, check crowd vibes, plan bar crawls, and never miss a good night out.
           </p>
+          <div class="hero-ctas">
+            <a href="#download" class="btn-primary">
+              <span>🍸</span> Download on iOS
+            </a>
+            <a href="#how-it-works" class="btn-secondary">
+              See how it works
+            </a>
+          </div>
         </div>
 
-        <!-- Right: phone mockups -->
         <div class="hero-phones">
-          <div class="hero-phone-wrap back">
+          <div class="hero-phone-back">
             <div class="phone-frame">
-              <div class="phone-frame-notch"></div>
+              <div class="phone-notch"></div>
               <img src="screenshots/happymaps/IMG_8768.PNG" alt="Map view" />
             </div>
           </div>
-          <div class="hero-phone-wrap front">
+          <div class="hero-phone-front">
             <div class="phone-frame">
-              <div class="phone-frame-notch"></div>
+              <div class="phone-notch"></div>
               <img src="screenshots/happymaps/IMG_tonight.PNG" alt="Tonight feed" />
             </div>
           </div>
         </div>
 
       </div>
-    </div>
-
-    <div class="scroll-indicator">
-      <div class="scroll-mouse"></div>
-      <span>Scroll</span>
     </div>
   </section>
 
@@ -928,15 +684,15 @@
           <div class="stat-number">500+</div>
           <div class="stat-label">Bars tracked</div>
         </div>
-        <div class="stat-item reveal reveal-delay-1">
+        <div class="stat-item reveal d1">
           <div class="stat-number">20+</div>
           <div class="stat-label">LA neighborhoods</div>
         </div>
-        <div class="stat-item reveal reveal-delay-2">
+        <div class="stat-item reveal d2">
           <div class="stat-number">4</div>
           <div class="stat-label">Core features</div>
         </div>
-        <div class="stat-item reveal reveal-delay-3">
+        <div class="stat-item reveal d3">
           <div class="stat-number">0</div>
           <div class="stat-label">Boring nights</div>
         </div>
@@ -953,9 +709,7 @@
         <h2>Four steps to a perfect night</h2>
         <p>From discovery to morning-after bragging rights — HappyMaps has your whole night covered.</p>
       </div>
-
       <div class="steps-grid">
-
         <div class="step-card reveal">
           <div class="step-number">1</div>
           <h3>Discover bars near you</h3>
@@ -964,8 +718,7 @@
             <img src="screenshots/happymaps/IMG_8767.PNG" alt="Discover bars" />
           </div>
         </div>
-
-        <div class="step-card reveal reveal-delay-1">
+        <div class="step-card reveal d1">
           <div class="step-number">2</div>
           <h3>Check crowd estimates</h3>
           <p>See how many people are going to each bar tonight in real time. Know before you go — no more arriving to an empty room.</p>
@@ -973,8 +726,7 @@
             <img src="screenshots/happymaps/IMG_8768.PNG" alt="Map crowd view" />
           </div>
         </div>
-
-        <div class="step-card reveal reveal-delay-2">
+        <div class="step-card reveal d2">
           <div class="step-number">3</div>
           <h3>Plan with friends</h3>
           <p>Create a private bar crawl, invite your crew, and lock in your route for the night. Keep everyone on the same page.</p>
@@ -982,8 +734,7 @@
             <img src="screenshots/happymaps/IMG_crawls.PNG" alt="Plan crawls" />
           </div>
         </div>
-
-        <div class="step-card reveal reveal-delay-3">
+        <div class="step-card reveal d3">
           <div class="step-number">4</div>
           <h3>Rate & track your nights</h3>
           <p>Log every bar you've been to, leave ratings, and build a history of your nights out on a personal calendar.</p>
@@ -991,7 +742,6 @@
             <img src="screenshots/happymaps/IMG_month.PNG" alt="Track nights" />
           </div>
         </div>
-
       </div>
     </div>
   </section>
@@ -1005,45 +755,37 @@
         <h2>Everything for a great night out</h2>
         <p>Built for the way college students actually plan their nights — social, spontaneous, and always moving.</p>
       </div>
-
       <div class="features-grid">
-
         <div class="feature-card highlight reveal">
           <span class="feature-icon">📍</span>
           <h3>Bar Discovery & Crowd Prediction</h3>
           <p>See what's popping tonight with real-time crowd estimates. The Tonight feed shows each bar's vibe, price range, and how many people are going — before you leave home.</p>
         </div>
-
-        <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-card reveal d1">
           <span class="feature-icon">🗺️</span>
           <h3>Interactive Map View</h3>
           <p>Explore bars across your city on a live map. See crowd counts pinned to each location so you can visualize where the energy is and plan your route.</p>
         </div>
-
-        <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-card reveal d2">
           <span class="feature-icon">🚶</span>
           <h3>Bar Crawl Planning</h3>
           <p>Build a custom bar crawl, invite friends, and keep the group moving together. Private and invite-only so your plans stay yours.</p>
         </div>
-
-        <div class="feature-card reveal reveal-delay-3">
+        <div class="feature-card reveal d3">
           <span class="feature-icon">🎓</span>
           <h3>College Community Groups</h3>
           <p>Join your school's community with a verified college email. See what's hot on your campus tonight and connect with fellow students.</p>
         </div>
-
-        <div class="feature-card reveal reveal-delay-4">
+        <div class="feature-card reveal d4">
           <span class="feature-icon">🙈</span>
           <h3>Anonymous Safety for Non-Friends</h3>
           <p>Crowd data is always aggregated — non-friends can never see who's going where. Your whereabouts are private to your friend circle.</p>
         </div>
-
-        <div class="feature-card reveal reveal-delay-5">
+        <div class="feature-card reveal d5">
           <span class="feature-icon">⭐</span>
           <h3>Bar Ratings, Happy Hours & Deals</h3>
           <p>Rate every bar you visit (think Beli for nightlife). Discover happy hour deals and get direct links to Maps and bar websites so you're always informed.</p>
         </div>
-
       </div>
     </div>
   </section>
@@ -1058,48 +800,42 @@
         <p>Every screen designed for the energy of a night out.</p>
       </div>
     </div>
-
-    <div class="screenshots-track-wrapper" id="scrollTrack">
+    <div class="screenshots-scroll" id="scrollTrack">
       <div class="screenshots-track" id="screenshotsTrack">
-
-        <!-- padding start -->
-        <div style="width: calc((100vw - 1160px) / 2 + 24px); flex-shrink:0;"></div>
 
         <div class="screenshot-item reveal">
           <div class="phone-frame">
-            <div class="phone-frame-notch"></div>
+            <div class="phone-notch"></div>
             <img src="screenshots/happymaps/IMG_tonight.PNG" alt="Tonight feed" />
           </div>
           <span class="screenshot-label">Tonight Feed</span>
         </div>
 
-        <div class="screenshot-item featured reveal reveal-delay-1">
-          <div class="phone-frame lg">
-            <div class="phone-frame-notch"></div>
+        <div class="screenshot-item featured reveal d1">
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
             <img src="screenshots/happymaps/IMG_8768.PNG" alt="Map view" />
           </div>
           <span class="screenshot-label">Map View</span>
         </div>
 
-        <div class="screenshot-item reveal reveal-delay-2">
+        <div class="screenshot-item reveal d2">
           <div class="phone-frame">
-            <div class="phone-frame-notch"></div>
+            <div class="phone-notch"></div>
             <img src="screenshots/happymaps/IMG_crawls.PNG" alt="Crawls" />
           </div>
           <span class="screenshot-label">Bar Crawls</span>
         </div>
 
-        <div class="screenshot-item reveal reveal-delay-3">
+        <div class="screenshot-item reveal d3">
           <div class="phone-frame">
-            <div class="phone-frame-notch"></div>
+            <div class="phone-notch"></div>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" style="width:100%;display:block;" font-family="'DM Sans',sans-serif">
               <rect width="390" height="844" fill="#F2F2F7"/>
               <rect width="390" height="142" fill="#F5B800"/>
               <text x="22" y="30" font-size="15" font-weight="600" fill="#1C1C1E">9:52</text>
-              <!-- Settings gear -->
               <circle cx="355" cy="82" r="22" fill="rgba(255,255,255,0.85)"/>
               <text x="355" y="89" font-size="16" text-anchor="middle" dominant-baseline="middle">⚙️</text>
-              <!-- Profile circle -->
               <circle cx="195" cy="188" r="52" fill="white"/>
               <circle cx="195" cy="188" r="46" fill="#1C1C1E"/>
               <text x="195" y="206" font-size="42" font-weight="800" fill="white" text-anchor="middle">O</text>
@@ -1108,12 +844,10 @@
               <text x="195" y="260" font-size="26" font-weight="800" fill="#1C1C1E" text-anchor="middle">Owen</text>
               <text x="195" y="280" font-size="14" fill="#8E8E93" text-anchor="middle">@owenpentz</text>
               <text x="195" y="298" font-size="13" fill="#8E8E93" text-anchor="middle">📍 Los Angeles · Since Mar 2026</text>
-              <!-- Action buttons -->
               <rect x="20" y="310" width="164" height="36" rx="18" fill="white" stroke="#DCDCDC" stroke-width="1.5"/>
               <text x="102" y="332" font-size="13" font-weight="600" fill="#1C1C1E" text-anchor="middle">Share Profile</text>
               <rect x="192" y="310" width="178" height="36" rx="18" fill="white" stroke="#DCDCDC" stroke-width="1.5"/>
               <text x="281" y="332" font-size="13" font-weight="600" fill="#1C1C1E" text-anchor="middle">Friends (8)</text>
-              <!-- Stats row -->
               <rect x="0" y="358" width="390" height="68" fill="white"/>
               <line x1="0" y1="358" x2="390" y2="358" stroke="#DCDCDC" stroke-width="1"/>
               <line x1="0" y1="426" x2="390" y2="426" stroke="#DCDCDC" stroke-width="1"/>
@@ -1125,45 +859,37 @@
               <line x1="293" y1="370" x2="293" y2="418" stroke="#DCDCDC" stroke-width="1"/>
               <text x="343" y="386" font-size="22" font-weight="800" fill="#1C1C1E" text-anchor="middle">5</text>
               <text x="343" y="405" font-size="12" fill="#8E8E93" text-anchor="middle">Crawls</text>
-              <!-- UCLA Verified -->
               <rect x="110" y="438" width="170" height="34" rx="17" fill="white" stroke="#34C759" stroke-width="1.5"/>
               <text x="195" y="459" font-size="13" font-weight="600" fill="#34C759" text-anchor="middle">✓ UCLA Verified</text>
-              <!-- Tonight's Plan -->
               <text x="20" y="498" font-size="18" font-weight="800" fill="#1C1C1E">Tonight's Plan</text>
               <rect x="12" y="506" width="366" height="56" rx="14" fill="white"/>
               <rect x="12" y="508" width="5" height="52" rx="2" fill="#F5B800"/>
               <text x="30" y="530" font-size="15" font-weight="700" fill="#1C1C1E">Belles Beach House</text>
               <text x="30" y="548" font-size="13" fill="#8E8E93">Venice Beach</text>
-              <!-- Friends Going Out Tonight -->
               <text x="20" y="586" font-size="18" font-weight="800" fill="#1C1C1E">Friends Going Out Tonight</text>
-              <!-- Friend 1 -->
               <rect x="12" y="596" width="366" height="54" rx="12" fill="white"/>
               <circle cx="50" cy="623" r="19" fill="#4ECDC4"/>
               <text x="50" y="629" font-size="12" font-weight="700" fill="white" text-anchor="middle">HS</text>
               <text x="80" y="617" font-size="14" font-weight="600" fill="#1C1C1E">Henry Sowells</text>
               <text x="80" y="636" font-size="12" fill="#8E8E93">Belles Beach House</text>
               <text x="364" y="627" font-size="18" fill="#C7C7CC" text-anchor="middle">›</text>
-              <!-- Friend 2 -->
               <rect x="12" y="656" width="366" height="54" rx="12" fill="white"/>
               <circle cx="50" cy="683" r="19" fill="#FF6B6B"/>
               <text x="50" y="689" font-size="12" font-weight="700" fill="white" text-anchor="middle">SM</text>
               <text x="80" y="677" font-size="14" font-weight="600" fill="#1C1C1E">Sofia Martinez</text>
               <text x="80" y="696" font-size="12" fill="#8E8E93">Bar Lubitsch</text>
               <text x="364" y="687" font-size="18" fill="#C7C7CC" text-anchor="middle">›</text>
-              <!-- Friend 3 -->
               <rect x="12" y="716" width="366" height="54" rx="12" fill="white"/>
               <circle cx="50" cy="743" r="19" fill="#45B7D1"/>
               <text x="50" y="749" font-size="12" font-weight="700" fill="white" text-anchor="middle">JK</text>
               <text x="80" y="737" font-size="14" font-weight="600" fill="#1C1C1E">Jake Kim</text>
               <text x="80" y="756" font-size="12" fill="#8E8E93">No Vacancy</text>
               <text x="364" y="747" font-size="18" fill="#C7C7CC" text-anchor="middle">›</text>
-              <!-- Friend 4 (partially visible under nav) -->
               <rect x="12" y="776" width="366" height="54" rx="12" fill="white"/>
               <circle cx="50" cy="800" r="19" fill="#DDA0DD"/>
               <text x="50" y="806" font-size="12" font-weight="700" fill="white" text-anchor="middle">MC</text>
               <text x="80" y="795" font-size="14" font-weight="600" fill="#1C1C1E">Mia Chen</text>
               <text x="80" y="814" font-size="12" fill="#8E8E93">Employees Only</text>
-              <!-- Bottom nav (covers partial Friend 4) -->
               <rect x="0" y="796" width="390" height="48" fill="white"/>
               <line x1="0" y1="796" x2="390" y2="796" stroke="#DCDCDC" stroke-width="0.5"/>
               <text x="39" y="820" font-size="18" text-anchor="middle">🍸</text>
@@ -1182,16 +908,13 @@
           <span class="screenshot-label">Profile</span>
         </div>
 
-        <div class="screenshot-item reveal reveal-delay-4">
+        <div class="screenshot-item reveal d4">
           <div class="phone-frame">
-            <div class="phone-frame-notch"></div>
+            <div class="phone-notch"></div>
             <img src="screenshots/happymaps/IMG_month.PNG" alt="Nights Out Calendar" />
           </div>
           <span class="screenshot-label">My Nights Out</span>
         </div>
-
-        <!-- padding end -->
-        <div style="width: calc((100vw - 1160px) / 2 + 24px); flex-shrink:0;"></div>
 
       </div>
     </div>
@@ -1202,93 +925,97 @@
     <div class="container">
       <div class="proof-layout">
 
-        <!-- Left: phones -->
-        <div class="proof-phones-stack reveal">
-          <div class="phone-frame sm">
-            <div class="phone-frame-notch"></div>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" style="width:100%;display:block;" font-family="'DM Sans',sans-serif">
-              <rect width="390" height="844" fill="#F2F2F7"/>
-              <rect width="390" height="142" fill="#F5B800"/>
-              <text x="22" y="30" font-size="15" font-weight="600" fill="#1C1C1E">9:52</text>
-              <circle cx="355" cy="82" r="22" fill="rgba(255,255,255,0.85)"/>
-              <text x="355" y="89" font-size="16" text-anchor="middle" dominant-baseline="middle">⚙️</text>
-              <circle cx="195" cy="188" r="52" fill="white"/>
-              <circle cx="195" cy="188" r="46" fill="#1C1C1E"/>
-              <text x="195" y="206" font-size="42" font-weight="800" fill="white" text-anchor="middle">O</text>
-              <circle cx="232" cy="222" r="13" fill="#F5B800" stroke="white" stroke-width="2"/>
-              <text x="232" y="228" font-size="11" text-anchor="middle">🎓</text>
-              <text x="195" y="260" font-size="26" font-weight="800" fill="#1C1C1E" text-anchor="middle">Owen</text>
-              <text x="195" y="280" font-size="14" fill="#8E8E93" text-anchor="middle">@owenpentz</text>
-              <text x="195" y="298" font-size="13" fill="#8E8E93" text-anchor="middle">📍 Los Angeles · Since Mar 2026</text>
-              <rect x="20" y="310" width="164" height="36" rx="18" fill="white" stroke="#DCDCDC" stroke-width="1.5"/>
-              <text x="102" y="332" font-size="13" font-weight="600" fill="#1C1C1E" text-anchor="middle">Share Profile</text>
-              <rect x="192" y="310" width="178" height="36" rx="18" fill="white" stroke="#DCDCDC" stroke-width="1.5"/>
-              <text x="281" y="332" font-size="13" font-weight="600" fill="#1C1C1E" text-anchor="middle">Friends (8)</text>
-              <rect x="0" y="358" width="390" height="68" fill="white"/>
-              <line x1="0" y1="358" x2="390" y2="358" stroke="#DCDCDC" stroke-width="1"/>
-              <line x1="0" y1="426" x2="390" y2="426" stroke="#DCDCDC" stroke-width="1"/>
-              <text x="97" y="386" font-size="22" font-weight="800" fill="#1C1C1E" text-anchor="middle">12</text>
-              <text x="97" y="405" font-size="12" fill="#8E8E93" text-anchor="middle">Favorites</text>
-              <line x1="195" y1="370" x2="195" y2="418" stroke="#DCDCDC" stroke-width="1"/>
-              <text x="195" y="386" font-size="22" font-weight="800" fill="#1C1C1E" text-anchor="middle">23</text>
-              <text x="195" y="405" font-size="12" fill="#8E8E93" text-anchor="middle">Bars Visited</text>
-              <line x1="293" y1="370" x2="293" y2="418" stroke="#DCDCDC" stroke-width="1"/>
-              <text x="343" y="386" font-size="22" font-weight="800" fill="#1C1C1E" text-anchor="middle">5</text>
-              <text x="343" y="405" font-size="12" fill="#8E8E93" text-anchor="middle">Crawls</text>
-              <rect x="110" y="438" width="170" height="34" rx="17" fill="white" stroke="#34C759" stroke-width="1.5"/>
-              <text x="195" y="459" font-size="13" font-weight="600" fill="#34C759" text-anchor="middle">✓ UCLA Verified</text>
-              <text x="20" y="498" font-size="18" font-weight="800" fill="#1C1C1E">Tonight's Plan</text>
-              <rect x="12" y="506" width="366" height="56" rx="14" fill="white"/>
-              <rect x="12" y="508" width="5" height="52" rx="2" fill="#F5B800"/>
-              <text x="30" y="530" font-size="15" font-weight="700" fill="#1C1C1E">Belles Beach House</text>
-              <text x="30" y="548" font-size="13" fill="#8E8E93">Venice Beach</text>
-              <text x="20" y="586" font-size="18" font-weight="800" fill="#1C1C1E">Friends Going Out Tonight</text>
-              <rect x="12" y="596" width="366" height="54" rx="12" fill="white"/>
-              <circle cx="50" cy="623" r="19" fill="#4ECDC4"/>
-              <text x="50" y="629" font-size="12" font-weight="700" fill="white" text-anchor="middle">HS</text>
-              <text x="80" y="617" font-size="14" font-weight="600" fill="#1C1C1E">Henry Sowells</text>
-              <text x="80" y="636" font-size="12" fill="#8E8E93">Belles Beach House</text>
-              <text x="364" y="627" font-size="18" fill="#C7C7CC" text-anchor="middle">›</text>
-              <rect x="12" y="656" width="366" height="54" rx="12" fill="white"/>
-              <circle cx="50" cy="683" r="19" fill="#FF6B6B"/>
-              <text x="50" y="689" font-size="12" font-weight="700" fill="white" text-anchor="middle">SM</text>
-              <text x="80" y="677" font-size="14" font-weight="600" fill="#1C1C1E">Sofia Martinez</text>
-              <text x="80" y="696" font-size="12" fill="#8E8E93">Bar Lubitsch</text>
-              <text x="364" y="687" font-size="18" fill="#C7C7CC" text-anchor="middle">›</text>
-              <rect x="12" y="716" width="366" height="54" rx="12" fill="white"/>
-              <circle cx="50" cy="743" r="19" fill="#45B7D1"/>
-              <text x="50" y="749" font-size="12" font-weight="700" fill="white" text-anchor="middle">JK</text>
-              <text x="80" y="737" font-size="14" font-weight="600" fill="#1C1C1E">Jake Kim</text>
-              <text x="80" y="756" font-size="12" fill="#8E8E93">No Vacancy</text>
-              <text x="364" y="747" font-size="18" fill="#C7C7CC" text-anchor="middle">›</text>
-              <rect x="12" y="776" width="366" height="54" rx="12" fill="white"/>
-              <circle cx="50" cy="800" r="19" fill="#DDA0DD"/>
-              <text x="50" y="806" font-size="12" font-weight="700" fill="white" text-anchor="middle">MC</text>
-              <text x="80" y="795" font-size="14" font-weight="600" fill="#1C1C1E">Mia Chen</text>
-              <text x="80" y="814" font-size="12" fill="#8E8E93">Employees Only</text>
-              <rect x="0" y="796" width="390" height="48" fill="white"/>
-              <line x1="0" y1="796" x2="390" y2="796" stroke="#DCDCDC" stroke-width="0.5"/>
-              <text x="39" y="820" font-size="18" text-anchor="middle">🍸</text>
-              <text x="39" y="836" font-size="10" fill="#8E8E93" text-anchor="middle">Tonight</text>
-              <text x="117" y="820" font-size="18" text-anchor="middle">🧭</text>
-              <text x="117" y="836" font-size="10" fill="#8E8E93" text-anchor="middle">Discover</text>
-              <text x="195" y="820" font-size="18" text-anchor="middle">🗺️</text>
-              <text x="195" y="836" font-size="10" fill="#8E8E93" text-anchor="middle">Map</text>
-              <text x="273" y="820" font-size="18" text-anchor="middle">🚶</text>
-              <text x="273" y="836" font-size="10" fill="#8E8E93" text-anchor="middle">Crawls</text>
-              <circle cx="351" cy="814" r="16" fill="#FFF5CC"/>
-              <text x="351" y="820" font-size="18" text-anchor="middle">👤</text>
-              <text x="351" y="836" font-size="10" font-weight="600" fill="#F5B800" text-anchor="middle">Profile</text>
-            </svg>
+        <!-- Desktop-only phone column -->
+        <div class="proof-phones-col">
+          <div class="proof-phone">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" style="width:100%;display:block;" font-family="'DM Sans',sans-serif">
+                <rect width="390" height="844" fill="#F2F2F7"/>
+                <rect width="390" height="142" fill="#F5B800"/>
+                <text x="22" y="30" font-size="15" font-weight="600" fill="#1C1C1E">9:52</text>
+                <circle cx="355" cy="82" r="22" fill="rgba(255,255,255,0.85)"/>
+                <text x="355" y="89" font-size="16" text-anchor="middle" dominant-baseline="middle">⚙️</text>
+                <circle cx="195" cy="188" r="52" fill="white"/>
+                <circle cx="195" cy="188" r="46" fill="#1C1C1E"/>
+                <text x="195" y="206" font-size="42" font-weight="800" fill="white" text-anchor="middle">O</text>
+                <circle cx="232" cy="222" r="13" fill="#F5B800" stroke="white" stroke-width="2"/>
+                <text x="232" y="228" font-size="11" text-anchor="middle">🎓</text>
+                <text x="195" y="260" font-size="26" font-weight="800" fill="#1C1C1E" text-anchor="middle">Owen</text>
+                <text x="195" y="280" font-size="14" fill="#8E8E93" text-anchor="middle">@owenpentz</text>
+                <text x="195" y="298" font-size="13" fill="#8E8E93" text-anchor="middle">📍 Los Angeles · Since Mar 2026</text>
+                <rect x="20" y="310" width="164" height="36" rx="18" fill="white" stroke="#DCDCDC" stroke-width="1.5"/>
+                <text x="102" y="332" font-size="13" font-weight="600" fill="#1C1C1E" text-anchor="middle">Share Profile</text>
+                <rect x="192" y="310" width="178" height="36" rx="18" fill="white" stroke="#DCDCDC" stroke-width="1.5"/>
+                <text x="281" y="332" font-size="13" font-weight="600" fill="#1C1C1E" text-anchor="middle">Friends (8)</text>
+                <rect x="0" y="358" width="390" height="68" fill="white"/>
+                <line x1="0" y1="358" x2="390" y2="358" stroke="#DCDCDC" stroke-width="1"/>
+                <line x1="0" y1="426" x2="390" y2="426" stroke="#DCDCDC" stroke-width="1"/>
+                <text x="97" y="386" font-size="22" font-weight="800" fill="#1C1C1E" text-anchor="middle">12</text>
+                <text x="97" y="405" font-size="12" fill="#8E8E93" text-anchor="middle">Favorites</text>
+                <line x1="195" y1="370" x2="195" y2="418" stroke="#DCDCDC" stroke-width="1"/>
+                <text x="195" y="386" font-size="22" font-weight="800" fill="#1C1C1E" text-anchor="middle">23</text>
+                <text x="195" y="405" font-size="12" fill="#8E8E93" text-anchor="middle">Bars Visited</text>
+                <line x1="293" y1="370" x2="293" y2="418" stroke="#DCDCDC" stroke-width="1"/>
+                <text x="343" y="386" font-size="22" font-weight="800" fill="#1C1C1E" text-anchor="middle">5</text>
+                <text x="343" y="405" font-size="12" fill="#8E8E93" text-anchor="middle">Crawls</text>
+                <rect x="110" y="438" width="170" height="34" rx="17" fill="white" stroke="#34C759" stroke-width="1.5"/>
+                <text x="195" y="459" font-size="13" font-weight="600" fill="#34C759" text-anchor="middle">✓ UCLA Verified</text>
+                <text x="20" y="498" font-size="18" font-weight="800" fill="#1C1C1E">Tonight's Plan</text>
+                <rect x="12" y="506" width="366" height="56" rx="14" fill="white"/>
+                <rect x="12" y="508" width="5" height="52" rx="2" fill="#F5B800"/>
+                <text x="30" y="530" font-size="15" font-weight="700" fill="#1C1C1E">Belles Beach House</text>
+                <text x="30" y="548" font-size="13" fill="#8E8E93">Venice Beach</text>
+                <text x="20" y="586" font-size="18" font-weight="800" fill="#1C1C1E">Friends Going Out Tonight</text>
+                <rect x="12" y="596" width="366" height="54" rx="12" fill="white"/>
+                <circle cx="50" cy="623" r="19" fill="#4ECDC4"/>
+                <text x="50" y="629" font-size="12" font-weight="700" fill="white" text-anchor="middle">HS</text>
+                <text x="80" y="617" font-size="14" font-weight="600" fill="#1C1C1E">Henry Sowells</text>
+                <text x="80" y="636" font-size="12" fill="#8E8E93">Belles Beach House</text>
+                <text x="364" y="627" font-size="18" fill="#C7C7CC" text-anchor="middle">›</text>
+                <rect x="12" y="656" width="366" height="54" rx="12" fill="white"/>
+                <circle cx="50" cy="683" r="19" fill="#FF6B6B"/>
+                <text x="50" y="689" font-size="12" font-weight="700" fill="white" text-anchor="middle">SM</text>
+                <text x="80" y="677" font-size="14" font-weight="600" fill="#1C1C1E">Sofia Martinez</text>
+                <text x="80" y="696" font-size="12" fill="#8E8E93">Bar Lubitsch</text>
+                <text x="364" y="687" font-size="18" fill="#C7C7CC" text-anchor="middle">›</text>
+                <rect x="12" y="716" width="366" height="54" rx="12" fill="white"/>
+                <circle cx="50" cy="743" r="19" fill="#45B7D1"/>
+                <text x="50" y="749" font-size="12" font-weight="700" fill="white" text-anchor="middle">JK</text>
+                <text x="80" y="737" font-size="14" font-weight="600" fill="#1C1C1E">Jake Kim</text>
+                <text x="80" y="756" font-size="12" fill="#8E8E93">No Vacancy</text>
+                <text x="364" y="747" font-size="18" fill="#C7C7CC" text-anchor="middle">›</text>
+                <rect x="12" y="776" width="366" height="54" rx="12" fill="white"/>
+                <circle cx="50" cy="800" r="19" fill="#DDA0DD"/>
+                <text x="50" y="806" font-size="12" font-weight="700" fill="white" text-anchor="middle">MC</text>
+                <text x="80" y="795" font-size="14" font-weight="600" fill="#1C1C1E">Mia Chen</text>
+                <text x="80" y="814" font-size="12" fill="#8E8E93">Employees Only</text>
+                <rect x="0" y="796" width="390" height="48" fill="white"/>
+                <line x1="0" y1="796" x2="390" y2="796" stroke="#DCDCDC" stroke-width="0.5"/>
+                <text x="39" y="820" font-size="18" text-anchor="middle">🍸</text>
+                <text x="39" y="836" font-size="10" fill="#8E8E93" text-anchor="middle">Tonight</text>
+                <text x="117" y="820" font-size="18" text-anchor="middle">🧭</text>
+                <text x="117" y="836" font-size="10" fill="#8E8E93" text-anchor="middle">Discover</text>
+                <text x="195" y="820" font-size="18" text-anchor="middle">🗺️</text>
+                <text x="195" y="836" font-size="10" fill="#8E8E93" text-anchor="middle">Map</text>
+                <text x="273" y="820" font-size="18" text-anchor="middle">🚶</text>
+                <text x="273" y="836" font-size="10" fill="#8E8E93" text-anchor="middle">Crawls</text>
+                <circle cx="351" cy="814" r="16" fill="#FFF5CC"/>
+                <text x="351" y="820" font-size="18" text-anchor="middle">👤</text>
+                <text x="351" y="836" font-size="10" font-weight="600" fill="#F5B800" text-anchor="middle">Profile</text>
+              </svg>
+            </div>
           </div>
-          <div class="phone-frame sm">
-            <div class="phone-frame-notch"></div>
-            <img src="screenshots/happymaps/IMG_month.PNG" alt="Calendar" />
+          <div class="proof-phone">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <img src="screenshots/happymaps/IMG_month.PNG" alt="Calendar" />
+            </div>
           </div>
         </div>
 
-        <!-- Right: copy -->
-        <div class="proof-text reveal reveal-delay-2">
+        <!-- Copy: always visible -->
+        <div class="proof-text reveal">
           <span class="label">Built for college students</span>
           <h2>Finally, a nightlife app that <em>gets it.</em></h2>
           <p>
@@ -1297,13 +1024,12 @@
           <p>
             Whether you're a freshman discovering your city or a senior with a regular crew, HappyMaps helps you own every night out and build memories worth looking back on.
           </p>
-
           <div class="proof-pills">
             <div class="pill"><span class="dot"></span> Verified college email login</div>
             <div class="pill"><span class="dot"></span> Private friend circles</div>
             <div class="pill"><span class="dot"></span> Real-time crowd data</div>
             <div class="pill"><span class="dot"></span> Bar crawl groups</div>
-            <div class="pill"><span class="dot"></span> Night history & stats</div>
+            <div class="pill"><span class="dot"></span> Night history &amp; stats</div>
             <div class="pill"><span class="dot"></span> Happy hour deals</div>
           </div>
         </div>
@@ -1317,12 +1043,21 @@
     <div class="container">
       <div class="download-content">
         <span class="label reveal">Get the app</span>
-        <h2 class="reveal reveal-delay-1">
+        <h2 class="reveal d1">
           Your next great night<br />starts <span class="accent">here.</span>
         </h2>
-        <p class="reveal reveal-delay-2">
+        <p class="reveal d2">
           Download HappyMaps and see where tonight is happening in your city.
         </p>
+        <div class="download-btns reveal d3">
+          <a href="#" class="store-btn amber">
+            <span class="store-icon">🍎</span>
+            <span class="store-text">
+              <span class="top">Download on the</span>
+              <span class="btm">App Store</span>
+            </span>
+          </a>
+        </div>
       </div>
     </div>
   </section>
@@ -1330,7 +1065,10 @@
   <!-- ── FOOTER ── -->
   <footer>
     <div class="container footer-inner">
-      <a href="#" class="footer-logo"><img src="assets/images/HappyMapsAppIcon.png" style="width:32px;height:32px;border-radius:9px;display:block;">Happy<span>Maps</span></a>
+      <a href="#" class="footer-logo">
+        <img src="assets/images/HappyMapsAppIcon.png" alt="HappyMaps" />
+        <span>HappyMaps</span>
+      </a>
       <ul class="footer-links">
         <li><a href="/privacy-policy">Privacy</a></li>
         <li><a href="/terms-of-service">Terms</a></li>
@@ -1343,14 +1081,13 @@
 
   <!-- ── JS ── -->
   <script>
-    // ── Nav scroll effect ──
+    // Nav scroll effect
     const nav = document.getElementById('nav');
     window.addEventListener('scroll', () => {
       nav.classList.toggle('scrolled', window.scrollY > 40);
     }, { passive: true });
 
-    // ── Scroll reveal with IntersectionObserver ──
-    const reveals = document.querySelectorAll('.reveal');
+    // Scroll reveal
     const revealObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -1358,72 +1095,36 @@
           revealObserver.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.1, rootMargin: '0px 0px -32px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-    reveals.forEach(el => revealObserver.observe(el));
-
-    // ── Screenshots drag-to-scroll ──
+    // Screenshots drag-to-scroll
     const track = document.getElementById('scrollTrack');
     let isDown = false, startX, scrollLeft;
-
     track.addEventListener('mousedown', e => {
       isDown = true;
       track.classList.add('dragging');
       startX = e.pageX - track.offsetLeft;
       scrollLeft = track.scrollLeft;
     });
-    track.addEventListener('mouseleave', () => {
-      isDown = false;
-      track.classList.remove('dragging');
-    });
-    track.addEventListener('mouseup', () => {
-      isDown = false;
-      track.classList.remove('dragging');
-    });
+    track.addEventListener('mouseleave', () => { isDown = false; track.classList.remove('dragging'); });
+    track.addEventListener('mouseup',    () => { isDown = false; track.classList.remove('dragging'); });
     track.addEventListener('mousemove', e => {
       if (!isDown) return;
       e.preventDefault();
-      const x = e.pageX - track.offsetLeft;
-      const walk = (x - startX) * 1.2;
-      track.scrollLeft = scrollLeft - walk;
+      track.scrollLeft = scrollLeft - (e.pageX - track.offsetLeft - startX) * 1.2;
     });
 
-    // Touch scroll (mobile)
-    let touchStartX = 0, touchScrollLeft = 0;
-    track.addEventListener('touchstart', e => {
-      touchStartX = e.touches[0].pageX;
-      touchScrollLeft = track.scrollLeft;
-    }, { passive: true });
-    track.addEventListener('touchmove', e => {
-      const dx = touchStartX - e.touches[0].pageX;
-      track.scrollLeft = touchScrollLeft + dx;
-    }, { passive: true });
-
-    // ── Subtle parallax on hero blobs ──
-    document.addEventListener('mousemove', e => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 20;
-      const y = (e.clientY / window.innerHeight - 0.5) * 20;
-      const hero = document.getElementById('hero');
-      if (!hero) return;
-      const phones = hero.querySelectorAll('.hero-phone-wrap');
-      phones.forEach((p, i) => {
-        const factor = i === 0 ? 0.8 : 1.2;
-        p.style.transform = p.classList.contains('back')
-          ? `translateX(${30 + x * factor * 0.3}px) rotate(-6deg) scale(0.9) translateY(${y * factor * 0.2}px)`
-          : `rotate(${3 + x * 0.05}deg) translateY(${y * factor * 0.2}px)`;
-      });
-    });
-
-    // ── Counter animation for stats ──
+    // Counter animation
     function animateCounter(el, target, duration = 1500) {
       const isPlus = el.textContent.includes('+');
       let start = null;
-      const step = (timestamp) => {
-        if (!start) start = timestamp;
-        const progress = Math.min((timestamp - start) / duration, 1);
+      const step = ts => {
+        if (!start) start = ts;
+        const progress = Math.min((ts - start) / duration, 1);
         const eased = 1 - Math.pow(1 - progress, 3);
         const value = Math.floor(eased * target);
-        el.textContent = value + (isPlus && value >= target ? '+' : (isPlus && value > 0 ? '+' : ''));
+        el.textContent = value + (isPlus && value > 0 ? '+' : '');
         if (progress < 1) requestAnimationFrame(step);
         else el.textContent = target + (isPlus ? '+' : '');
       };
@@ -1431,18 +1132,15 @@
     }
 
     const statNumbers = document.querySelectorAll('.stat-number');
-    const statValues = [500, 20, 4, 0];
-    const statsObserver = new IntersectionObserver((entries) => {
+    const statValues  = [500, 20, 4, 0];
+    const statsObserver = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          statNumbers.forEach((el, i) => {
-            animateCounter(el, statValues[i]);
-          });
+          statNumbers.forEach((el, i) => animateCounter(el, statValues[i]));
           statsObserver.disconnect();
         }
       });
     }, { threshold: 0.5 });
-
     const statsSection = document.getElementById('stats');
     if (statsSection) statsObserver.observe(statsSection);
   </script>
