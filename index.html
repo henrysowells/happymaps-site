@@ -331,9 +331,10 @@
     /* ═══════════════════════════════════════
        SCREENSHOTS — horizontal scroll
     ═══════════════════════════════════════ */
-    #screenshots { padding: 64px 0; }
+    #screenshots { padding: 64px 0; display: flex; flex-direction: column; align-items: center; }
 
     .screenshots-scroll {
+      display: flex; justify-content: center; width: 100%;
       overflow-x: scroll;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
@@ -579,6 +580,7 @@
         margin: 32px -24px 0;
         padding: 20px 24px 40px;
       }
+      .screenshots-track { justify-content: center; width: 100%; }
       .screenshot-item .phone-frame { width: 240px; }
       .screenshot-item.featured .phone-frame { width: 280px; }
 
