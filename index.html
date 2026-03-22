@@ -277,6 +277,60 @@
     .hero-phone-back { display: none; }
 
     /* ═══════════════════════════════════════
+       SOCIAL PROOF STRIP
+    ═══════════════════════════════════════ */
+    #social-strip {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+    }
+    .social-strip-inner {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px;
+    }
+    .avatar-stack {
+      display: flex; align-items: center;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--bg);
+      border: 2px solid var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.02em;
+      color: var(--amber);
+      margin-left: -8px;
+      flex-shrink: 0;
+    }
+    .avatar:first-child { margin-left: 0; }
+    .avatar:nth-child(1) { background: #1a1500; }
+    .avatar:nth-child(2) { background: #141a00; }
+    .avatar:nth-child(3) { background: #001a16; }
+    .avatar:nth-child(4) { background: #0f001a; }
+    .strip-text {
+      font-size: 14px; font-weight: 500; color: var(--text);
+      white-space: nowrap;
+    }
+    .strip-count {
+      color: var(--amber); font-weight: 700;
+      display: inline-block;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .strip-count.tick-out {
+      opacity: 0; transform: translateY(-6px);
+    }
+    .strip-count.tick-in {
+      opacity: 0; transform: translateY(6px);
+    }
+    .strip-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--amber);
+      flex-shrink: 0;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* ═══════════════════════════════════════
        STATS
     ═══════════════════════════════════════ */
     #stats {
@@ -812,6 +866,22 @@
       </div>
     </div>
   </section>
+
+  <!-- ── SOCIAL PROOF STRIP ── -->
+  <div id="social-strip">
+    <div class="container">
+      <div class="social-strip-inner">
+        <div class="strip-dot"></div>
+        <div class="avatar-stack">
+          <div class="avatar">HS</div>
+          <div class="avatar">JK</div>
+          <div class="avatar">MC</div>
+          <div class="avatar">SW</div>
+        </div>
+        <p class="strip-text"><span class="strip-count" id="strip-count">47</span> students going out in LA tonight</p>
+      </div>
+    </div>
+  </div>
 
   <!-- ── STATS ── -->
   <section id="stats">
@@ -1353,6 +1423,30 @@
     }, { threshold: 0.5 });
     const statsSection = document.getElementById('stats');
     if (statsSection) statsObserver.observe(statsSection);
+    // Social proof strip — cycling count with tick animation
+    (function () {
+      const el = document.getElementById('strip-count');
+      if (!el) return;
+      const counts = [47, 52, 61, 58];
+      let idx = 0;
+
+      function cycle() {
+        idx = (idx + 1) % counts.length;
+        // tick out
+        el.classList.add('tick-out');
+        setTimeout(() => {
+          el.textContent = counts[idx];
+          el.classList.remove('tick-out');
+          el.classList.add('tick-in');
+          // force reflow so tick-in transition fires
+          void el.offsetWidth;
+          el.classList.remove('tick-in');
+        }, 200);
+      }
+
+      setInterval(cycle, 8000);
+    })();
+
     // Features staggered reveal (80 ms per card)
     const featCards = document.querySelectorAll('.feat-reveal');
     if (featCards.length) {
