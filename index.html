@@ -74,6 +74,27 @@
       color: var(--amber);
     }
     .accent { color: var(--amber); }
+    .accent-shimmer {
+      background: linear-gradient(
+        90deg,
+        #b87800 0%,
+        #FFB800 30%,
+        #ffe680 50%,
+        #FFB800 70%,
+        #b87800 100%
+      );
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: neon-shimmer 2.8s ease-in-out infinite;
+      filter: drop-shadow(0 0 6px rgba(255,184,0,0.55));
+    }
+    @keyframes neon-shimmer {
+      0%   { background-position: 200% center; filter: drop-shadow(0 0 4px rgba(255,184,0,0.4)); }
+      50%  { background-position: 0% center;   filter: drop-shadow(0 0 12px rgba(255,220,80,0.85)); }
+      100% { background-position: 200% center; filter: drop-shadow(0 0 4px rgba(255,184,0,0.4)); }
+    }
     .divider {
       width: 44px; height: 3px;
       background: var(--amber); border-radius: 2px;
@@ -644,7 +665,7 @@
             <span>Now available on iOS</span>
           </div>
           <h1 class="hero-title">
-            See where<br />the night<br />is <span class="accent">happening.</span>
+            See where<br />the night<br />is <span class="accent accent-shimmer">happening.</span>
           </h1>
           <p class="hero-sub">
             HappyMaps is the social app for college students to discover bars, check crowd vibes, plan bar crawls, and never miss a good night out.
