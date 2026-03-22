@@ -436,6 +436,70 @@
     .pill .dot { width: 5px; height: 5px; background: var(--amber); border-radius: 50%; flex-shrink: 0; }
 
     /* ═══════════════════════════════════════
+       SEARCH DEMO
+    ═══════════════════════════════════════ */
+    #search-demo {
+      padding: 72px 0;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    #search-demo h2 {
+      font-size: 30px; font-weight: 800;
+      letter-spacing: -0.03em; line-height: 1.15;
+      margin-bottom: 10px;
+    }
+    #search-demo .search-demo-sub {
+      font-size: 15px; color: var(--text-2);
+      margin-bottom: 36px; line-height: 1.6;
+    }
+    .search-bar-wrap {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 0 4px;
+    }
+    .search-bar {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface);
+      border: 1px solid rgba(255,184,0,0.28);
+      border-radius: 16px;
+      padding: 15px 20px;
+      box-shadow: 0 0 48px rgba(255,184,0,0.07), 0 4px 24px rgba(0,0,0,0.45);
+    }
+    .search-bar-icon {
+      flex-shrink: 0; color: var(--amber); line-height: 0;
+    }
+    .search-bar-text {
+      flex: 1; text-align: left;
+      font-size: 15px; font-family: 'DM Sans', sans-serif;
+      min-height: 22px; display: flex; align-items: center;
+    }
+    #search-placeholder { color: var(--text-2); }
+    #search-cursor {
+      display: inline-block;
+      width: 2px; height: 16px;
+      background: var(--amber);
+      border-radius: 1px;
+      vertical-align: middle;
+      margin-left: 1px;
+      animation: cursor-blink 0.95s ease-in-out infinite;
+    }
+    @keyframes cursor-blink {
+      0%, 45% { opacity: 1; }
+      55%, 100% { opacity: 0; }
+    }
+    .search-bar-badge {
+      flex-shrink: 0;
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 600; color: var(--amber);
+      background: var(--amber-glow);
+      border: 1px solid rgba(255,184,0,0.2);
+      padding: 4px 10px; border-radius: 100px;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .search-bar-badge svg { flex-shrink: 0; }
+
+    /* ═══════════════════════════════════════
        DOWNLOAD CTA
     ═══════════════════════════════════════ */
     #download { padding: 72px 0; text-align: center; overflow: hidden; }
@@ -553,6 +617,10 @@
       .proof-text h2 { font-size: 34px; }
       .proof-pills { justify-content: flex-start; }
 
+      /* search demo */
+      #search-demo { padding: 96px 0; }
+      #search-demo h2 { font-size: 38px; }
+
       /* download */
       #download { padding: 96px 0; }
       .download-content h2 { font-size: 50px; }
@@ -644,6 +712,10 @@
       .proof-text { text-align: left; }
       .proof-pills { justify-content: flex-start; }
       .proof-text h2 { font-size: 48px; }
+
+      /* search demo */
+      #search-demo { padding: 120px 0; }
+      #search-demo h2 { font-size: 46px; }
 
       /* download */
       #download { padding: 140px 0; }
@@ -1080,6 +1152,31 @@
     </div>
   </section>
 
+  <!-- ── SEARCH DEMO ── -->
+  <section id="search-demo">
+    <div class="container">
+      <span class="label reveal">Live search</span>
+      <h2 class="reveal d1">Find your night,<br />in seconds.</h2>
+      <p class="search-demo-sub reveal d2">Type anything — bars, neighborhoods, your friends, the vibe.</p>
+      <div class="search-bar-wrap reveal d3">
+        <div class="search-bar">
+          <span class="search-bar-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </span>
+          <span class="search-bar-text">
+            <span id="search-placeholder"></span><span id="search-cursor"></span>
+          </span>
+          <span class="search-bar-badge">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Los Angeles
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ── DOWNLOAD CTA ── -->
   <section id="download">
     <div class="container">
@@ -1207,6 +1304,61 @@
     }, { threshold: 0.5 });
     const statsSection = document.getElementById('stats');
     if (statsSection) statsObserver.observe(statsSection);
+    // Search bar typewriter animation
+    (function () {
+      const phrases = [
+        "Bars near UCLA tonight...",
+        "Where are 78 people going right now...",
+        "Venice Beach · happy hour deals...",
+        "Your friends are at Belles Beach House...",
+      ];
+      const placeholder = document.getElementById('search-placeholder');
+      const cursor      = document.getElementById('search-cursor');
+      if (!placeholder || !cursor) return;
+
+      let phraseIdx = 0;
+      let charIdx   = 0;
+      let state     = 'typing'; // 'typing' | 'pause' | 'fadeout'
+      let timer;
+
+      function tick() {
+        const phrase = phrases[phraseIdx];
+
+        if (state === 'typing') {
+          charIdx++;
+          placeholder.textContent = phrase.slice(0, charIdx);
+          if (charIdx === phrase.length) {
+            state = 'pause';
+            timer = setTimeout(tick, 2200);
+          } else {
+            // Vary speed slightly for organic feel
+            const delay = 48 + Math.random() * 28;
+            timer = setTimeout(tick, delay);
+          }
+
+        } else if (state === 'pause') {
+          state = 'fadeout';
+          placeholder.style.transition = 'opacity 0.38s ease';
+          cursor.style.transition      = 'opacity 0.38s ease';
+          placeholder.style.opacity    = '0';
+          cursor.style.opacity         = '0';
+          timer = setTimeout(() => {
+            phraseIdx = (phraseIdx + 1) % phrases.length;
+            charIdx   = 0;
+            placeholder.textContent   = '';
+            placeholder.style.transition = 'none';
+            cursor.style.transition      = 'none';
+            placeholder.style.opacity = '1';
+            cursor.style.opacity      = '1';
+            state = 'typing';
+            timer = setTimeout(tick, 120);
+          }, 420);
+        }
+      }
+
+      // Small initial delay before starting
+      timer = setTimeout(tick, 800);
+    })();
   </script>
 
 </body>
