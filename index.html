@@ -584,16 +584,41 @@
     .search-bar-wrap {
       max-width: 500px;
       margin: 0 auto;
-      padding: 0 4px;
+      background: #1a1a1a;
+      border: 1px solid rgba(255,184,0,0.32);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 0 56px rgba(255,184,0,0.09), 0 8px 32px rgba(0,0,0,0.55);
     }
     .search-bar {
       display: flex; align-items: center; gap: 12px;
-      background: var(--surface);
-      border: 1px solid rgba(255,184,0,0.28);
-      border-radius: 16px;
       padding: 15px 20px;
-      box-shadow: 0 0 48px rgba(255,184,0,0.07), 0 4px 24px rgba(0,0,0,0.45);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
     }
+    .search-results { /* result rows live here */ }
+    .search-result-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 20px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      text-align: left; cursor: default;
+      opacity: 0; transform: translateY(5px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .search-result-row:first-child { border-top: none; }
+    .search-result-row.visible { opacity: 1; transform: translateY(0); }
+    .search-result-row:hover { background: rgba(255,184,0,0.04); }
+    .result-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--amber); flex-shrink: 0;
+      box-shadow: 0 0 5px rgba(255,184,0,0.55);
+    }
+    .result-name {
+      flex: 1; color: var(--text);
+      font-size: 14px; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .result-meta { color: var(--text-3); font-size: 13px; white-space: nowrap; }
+    .result-meta strong { color: var(--amber); font-weight: 700; }
     .search-bar-icon {
       flex-shrink: 0; color: var(--amber); line-height: 0;
     }
@@ -1361,6 +1386,23 @@
             Los Angeles
           </span>
         </div>
+        <div class="search-results" id="searchResults">
+          <div class="search-result-row">
+            <span class="result-dot"></span>
+            <span class="result-name">Belles Beach House</span>
+            <span class="result-meta"><strong>78</strong> going tonight</span>
+          </div>
+          <div class="search-result-row">
+            <span class="result-dot"></span>
+            <span class="result-name">The Waterfront</span>
+            <span class="result-meta"><strong>52</strong> going tonight</span>
+          </div>
+          <div class="search-result-row">
+            <span class="result-dot"></span>
+            <span class="result-name">No Vacancy</span>
+            <span class="result-meta"><strong>31</strong> going tonight</span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -1568,6 +1610,26 @@
       }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
       featObserver.observe(document.getElementById('features'));
     }
+
+    // Search result rows staggered reveal
+    (function () {
+      const rows = document.querySelectorAll('#searchResults .search-result-row');
+      if (!rows.length) return;
+      let fired = false;
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !fired) {
+            fired = true;
+            observer.disconnect();
+            rows.forEach((row, i) => {
+              setTimeout(() => row.classList.add('visible'), 1000 + i * 300);
+            });
+          }
+        });
+      }, { threshold: 0.3 });
+      const section = document.getElementById('search-demo');
+      if (section) observer.observe(section);
+    })();
 
     // Search bar typewriter animation
     (function () {
