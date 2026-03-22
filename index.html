@@ -578,13 +578,13 @@
     /* ═══════════════════════════════════════
        DOWNLOAD CTA
     ═══════════════════════════════════════ */
-    #download { padding: 72px 0; text-align: center; overflow: hidden; }
+    #download { padding: 72px 0; text-align: center; overflow: hidden; position: relative; }
     #download::before {
       content: '';
-      position: absolute; width: 600px; height: 600px;
-      left: 50%; top: 50%; transform: translate(-50%,-50%);
-      background: radial-gradient(circle, rgba(255,184,0,0.10) 0%, transparent 65%);
-      border-radius: 50%; pointer-events: none;
+      position: absolute; width: 700px; height: 500px;
+      left: 50%; top: 0; transform: translateX(-50%);
+      background: radial-gradient(ellipse at 50% 30%, rgba(255,184,0,0.18) 0%, rgba(255,184,0,0.06) 40%, transparent 70%);
+      pointer-events: none;
     }
     .download-content { position: relative; }
     .download-content .label { margin-bottom: 14px; }
@@ -1304,16 +1304,13 @@
         <h2 class="reveal d1">
           Your next great night<br />starts <span class="accent">here.</span>
         </h2>
-        <p class="reveal d2">
+        <p>
           Download HappyMaps and see where tonight is happening in your city.
         </p>
-        <div class="download-btns reveal d3">
-          <a href="#" class="store-btn amber">
-            <span class="store-icon">🍎</span>
-            <span class="store-text">
-              <span class="top">Download on the</span>
-              <span class="btm">App Store</span>
-            </span>
+        <div class="download-btns">
+          <a href="#" class="btn-primary">
+            <img src="assets/images/HappyMapsAppIcon.png" style="width:22px;height:22px;border-radius:5px;flex-shrink:0;" alt="" />
+            Download on the App Store
           </a>
         </div>
       </div>
