@@ -294,7 +294,26 @@
       font-size: 36px; font-weight: 800;
       color: var(--amber); line-height: 1;
       margin-bottom: 5px; letter-spacing: -0.02em;
+      overflow: hidden;
     }
+    .stat-digit { display: block; }
+    @keyframes stat-tick {
+      from { transform: translateY(45%); opacity: 0; }
+      to   { transform: translateY(0);   opacity: 1; }
+    }
+    .stat-item { position: relative; }
+    .stat-item::after {
+      content: '';
+      position: absolute;
+      bottom: -8px; left: 50%;
+      transform: translateX(-50%);
+      height: 2px;
+      width: 0;
+      background: linear-gradient(90deg, transparent, var(--amber) 25%, var(--amber) 75%, transparent);
+      border-radius: 1px;
+      transition: width 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+    }
+    .stat-item.stat-done::after { width: 52px; }
     .stat-label { font-size: 13px; color: var(--text-2); font-weight: 500; }
 
     /* ═══════════════════════════════════════
@@ -704,19 +723,19 @@
     <div class="container">
       <div class="stats-grid">
         <div class="stat-item reveal">
-          <div class="stat-number">500+</div>
+          <div class="stat-number"><span class="stat-digit">500+</span></div>
           <div class="stat-label">Bars tracked</div>
         </div>
         <div class="stat-item reveal d1">
-          <div class="stat-number">20+</div>
+          <div class="stat-number"><span class="stat-digit">20+</span></div>
           <div class="stat-label">LA neighborhoods</div>
         </div>
         <div class="stat-item reveal d2">
-          <div class="stat-number">4</div>
+          <div class="stat-number"><span class="stat-digit">4</span></div>
           <div class="stat-label">Core features</div>
         </div>
         <div class="stat-item reveal d3">
-          <div class="stat-number">0</div>
+          <div class="stat-number"><span class="stat-digit">0</span></div>
           <div class="stat-label">Boring nights</div>
         </div>
       </div>
@@ -1138,19 +1157,41 @@
       track.scrollLeft = scrollLeft - (e.pageX - track.offsetLeft - startX) * 1.2;
     });
 
-    // Counter animation
+    // Counter animation with slot-machine tick + underline reveal
     function animateCounter(el, target, duration = 1500) {
-      const isPlus = el.textContent.includes('+');
-      let start = null;
-      const step = ts => {
+      const digit   = el.querySelector('.stat-digit');
+      const isPlus  = digit.textContent.includes('+');
+      const statItem = el.closest('.stat-item');
+      let start     = null;
+      let lastValue = -1;
+
+      function triggerTick() {
+        digit.style.animation = 'none';
+        void digit.offsetWidth; // force reflow so animation restarts
+        digit.style.animation = 'stat-tick 0.09s ease-out';
+      }
+
+      function step(ts) {
         if (!start) start = ts;
         const progress = Math.min((ts - start) / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const value = Math.floor(eased * target);
-        el.textContent = value + (isPlus && value > 0 ? '+' : '');
-        if (progress < 1) requestAnimationFrame(step);
-        else el.textContent = target + (isPlus ? '+' : '');
-      };
+        const eased    = 1 - Math.pow(1 - progress, 3);
+        const value    = Math.floor(eased * target);
+
+        if (value !== lastValue) {
+          digit.textContent = value + (isPlus && value > 0 ? '+' : '');
+          triggerTick();
+          lastValue = value;
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          digit.textContent = target + (isPlus ? '+' : '');
+          triggerTick();
+          statItem.classList.add('stat-done');
+        }
+      }
+
       requestAnimationFrame(step);
     }
 
