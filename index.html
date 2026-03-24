@@ -347,9 +347,10 @@
     }
     .stats-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 28px 16px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
       text-align: center;
+      align-items: start;
     }
     .stat-number {
       font-size: 36px; font-weight: 800;
@@ -400,7 +401,7 @@
       margin: 0 auto 14px;
     }
     .step-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.01em; }
-    .step-card > p { font-size: 14px; color: var(--text-2); line-height: 1.6; }
+    .step-text > p { font-size: 14px; color: var(--text-2); line-height: 1.6; }
     .step-screenshot {
       margin-top: 18px; border-radius: 12px;
       overflow: hidden; border: 1px solid var(--border);
@@ -454,7 +455,7 @@
     /* ═══════════════════════════════════════
        SCREENSHOTS — horizontal scroll
     ═══════════════════════════════════════ */
-    #screenshots { padding: 64px 0; display: flex; flex-direction: column; align-items: center; }
+    #screenshots { padding: 64px 0 32px; display: flex; flex-direction: column; align-items: center; }
 
     .screenshots-scroll {
       display: flex; justify-content: center; width: 100%;
@@ -538,7 +539,7 @@
     /* ═══════════════════════════════════════
        SOCIAL PROOF
     ═══════════════════════════════════════ */
-    #social-proof { padding: 64px 0; background: var(--surface); }
+    #social-proof { padding: 32px 0 64px; background: var(--surface); }
 
     /* phones column hidden on mobile */
     .proof-phones-col { display: none; }
@@ -761,13 +762,13 @@
       .features-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
 
       /* screenshots */
-      #screenshots { padding: 88px 0; }
+      #screenshots { padding: 88px 0 40px; }
       .screenshots-scroll { margin: 24px -24px 0; padding: 16px 24px 32px; }
       .screenshot-item .phone-frame { width: 210px; }
       .screenshot-item.featured .phone-frame { width: 235px; }
 
       /* social proof */
-      #social-proof { padding: 88px 0; }
+      #social-proof { padding: 40px 0 88px; }
       .proof-text h2 { font-size: 34px; }
       .proof-pills { justify-content: flex-start; }
 
@@ -825,11 +826,27 @@
         will-change: transform;
       }
 
-      /* steps */
+      /* steps — alternating text/image rows */
       #how-it-works { padding: 120px 0; }
-      .steps-grid { grid-template-columns: repeat(4,1fr); gap: 16px; }
-      .step-card { text-align: left; }
-      .step-number { margin: 0 0 14px; }
+      .steps-grid { grid-template-columns: 1fr; gap: 0; }
+      .step-card {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 64px;
+        align-items: center;
+        text-align: left;
+        background: none;
+        border: none;
+        border-radius: 0;
+        border-bottom: 1px solid var(--border);
+        padding: 64px 0;
+      }
+      .step-card:last-child { border-bottom: none; }
+      .step-text { display: flex; flex-direction: column; justify-content: center; }
+      .step-number { margin: 0 0 18px; }
+      .step-screenshot { margin-top: 0; max-width: 300px; justify-self: center; }
+      /* even steps: image left, text right */
+      .step-card:nth-child(even) .step-screenshot { order: -1; }
 
       /* features */
       #features { padding: 120px 0; }
@@ -838,7 +855,7 @@
       .feature-icon { margin: 0 0 14px; }
 
       /* screenshots */
-      #screenshots { padding: 120px 0; }
+      #screenshots { padding: 120px 0 48px; }
       .screenshots-scroll {
         margin: 32px -24px 0;
         padding: 20px 24px 40px;
@@ -848,7 +865,7 @@
       .screenshot-item.featured .phone-frame { width: 280px; }
 
       /* social proof: two-column */
-      #social-proof { padding: 120px 0; }
+      #social-proof { padding: 48px 0 120px; }
       .proof-layout {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -996,33 +1013,41 @@
       </div>
       <div class="steps-grid">
         <div class="step-card reveal">
-          <div class="step-number">1</div>
-          <h3>Discover bars near you</h3>
-          <p>Browse tonight's hottest spots in your city, sorted by crowd and vibe. Filter by neighborhood, price, or type.</p>
+          <div class="step-text">
+            <div class="step-number">1</div>
+            <h3>Discover bars near you</h3>
+            <p>Browse tonight's hottest spots in your city, sorted by crowd and vibe. Filter by neighborhood, price, or type.</p>
+          </div>
           <div class="step-screenshot">
             <img src="screenshots/happymaps/IMG_8767.PNG" alt="Discover bars" />
           </div>
         </div>
         <div class="step-card reveal d1">
-          <div class="step-number">2</div>
-          <h3>Check crowd estimates</h3>
-          <p>See how many people are going to each bar tonight in real time. Know before you go — no more arriving to an empty room.</p>
+          <div class="step-text">
+            <div class="step-number">2</div>
+            <h3>Check crowd estimates</h3>
+            <p>See how many people are going to each bar tonight in real time. Know before you go — no more arriving to an empty room.</p>
+          </div>
           <div class="step-screenshot">
             <img src="screenshots/happymaps/IMG_8768.PNG" alt="Map crowd view" />
           </div>
         </div>
         <div class="step-card reveal d2">
-          <div class="step-number">3</div>
-          <h3>Plan with friends</h3>
-          <p>Create a private bar crawl, invite your crew, and lock in your route for the night. Keep everyone on the same page.</p>
+          <div class="step-text">
+            <div class="step-number">3</div>
+            <h3>Plan with friends</h3>
+            <p>Create a private bar crawl, invite your crew, and lock in your route for the night. Keep everyone on the same page.</p>
+          </div>
           <div class="step-screenshot">
             <img src="screenshots/happymaps/IMG_crawls.PNG" alt="Plan crawls" />
           </div>
         </div>
         <div class="step-card reveal d3">
-          <div class="step-number">4</div>
-          <h3>Rate & track your nights</h3>
-          <p>Log every bar you've been to, leave ratings, and build a history of your nights out on a personal calendar.</p>
+          <div class="step-text">
+            <div class="step-number">4</div>
+            <h3>Rate & track your nights</h3>
+            <p>Log every bar you've been to, leave ratings, and build a history of your nights out on a personal calendar.</p>
+          </div>
           <div class="step-screenshot">
             <img src="screenshots/happymaps/IMG_month.PNG" alt="Track nights" />
           </div>
