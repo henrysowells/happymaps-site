@@ -906,6 +906,57 @@
       .step-card:hover { border-color: rgba(255,184,0,0.3); transform: translateY(-4px); transition: border-color 0.3s, transform 0.3s; }
       .feature-card:hover { box-shadow: inset 3px 0 0 var(--amber), 0 0 40px rgba(255,184,0,0.07); transform: translateY(-3px); }
     }
+
+    /* ═══════════════════════════════════════
+       AMBER SPOTLIGHT / GLOW CARD EFFECT
+    ═══════════════════════════════════════ */
+    .step-card,
+    .feature-card {
+      overflow: hidden;
+    }
+
+    /* Spotlight layer — sits behind card content */
+    .step-card::before,
+    .feature-card::before,
+    .screenshot-item .phone-frame::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(
+        480px circle at var(--glow-x, -9999px) var(--glow-y, -9999px),
+        rgba(255, 184, 0, 0.11) 0%,
+        rgba(255, 184, 0, 0.04) 40%,
+        transparent 65%
+      );
+      pointer-events: none;
+      z-index: 0;
+      will-change: background;
+    }
+
+    /* Lift card content above the spotlight layer */
+    .step-card > *,
+    .feature-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Border brightens when spotlight is active */
+    .step-card.glow-active {
+      border-color: rgba(255, 184, 0, 0.28) !important;
+    }
+    .feature-card.glow-active {
+      border-color: rgba(255, 184, 0, 0.28) !important;
+      box-shadow: 0 0 32px rgba(255, 184, 0, 0.06);
+    }
+    .screenshot-item.glow-active .phone-frame {
+      border-color: rgba(255, 184, 0, 0.35) !important;
+      box-shadow:
+        0 0 0 1px rgba(255, 184, 0, 0.25),
+        0 40px 80px rgba(0,0,0,0.7),
+        0 0 60px rgba(255,184,0,0.13),
+        inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
   </style>
 </head>
 <body>
@@ -1693,6 +1744,36 @@
 
       // Small initial delay before starting
       timer = setTimeout(tick, 800);
+    })();
+
+    // ── Amber spotlight / glow card effect ──
+    (function () {
+      // Cards where the glow tracks the cursor
+      const stepCards    = document.querySelectorAll('.step-card');
+      const featureCards = document.querySelectorAll('.feature-card');
+      const screenshotItems = document.querySelectorAll('.screenshot-item');
+
+      function bindGlow(card, glowTarget) {
+        card.addEventListener('mousemove', function (e) {
+          const rect = glowTarget.getBoundingClientRect();
+          glowTarget.style.setProperty('--glow-x', (e.clientX - rect.left) + 'px');
+          glowTarget.style.setProperty('--glow-y', (e.clientY - rect.top)  + 'px');
+          card.classList.add('glow-active');
+        });
+
+        card.addEventListener('mouseleave', function () {
+          glowTarget.style.setProperty('--glow-x', '-9999px');
+          glowTarget.style.setProperty('--glow-y', '-9999px');
+          card.classList.remove('glow-active');
+        });
+      }
+
+      stepCards.forEach(function (card) { bindGlow(card, card); });
+      featureCards.forEach(function (card) { bindGlow(card, card); });
+      screenshotItems.forEach(function (item) {
+        const frame = item.querySelector('.phone-frame');
+        if (frame) bindGlow(item, frame);
+      });
     })();
   </script>
 
