@@ -956,6 +956,98 @@
         0 0 60px rgba(255,184,0,0.13),
         inset 0 0 0 1px rgba(255,255,255,0.04);
     }
+
+    /* ═══════════════════════════════════════
+       HERO PHONE SCREEN CYCLING
+    ═══════════════════════════════════════ */
+    .phone-screen {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.45s ease;
+      pointer-events: none;
+    }
+    .phone-screen.active { opacity: 1; }
+    /* height anchor — first img stays in flow but invisible */
+    .phone-screen-anchor {
+      width: 100%; display: block; visibility: hidden;
+    }
+    .hero-screen-dots {
+      display: flex; gap: 8px; justify-content: center;
+      margin-top: 14px;
+    }
+    .hero-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: rgba(255,184,0,0.25);
+      cursor: pointer;
+      transition: background 0.25s, transform 0.25s;
+      flex-shrink: 0;
+    }
+    .hero-dot.active {
+      background: var(--amber);
+      transform: scale(1.4);
+      box-shadow: 0 0 6px rgba(255,184,0,0.6);
+    }
+
+    /* ═══════════════════════════════════════
+       CITY SWITCHER
+    ═══════════════════════════════════════ */
+    .search-bar-badge {
+      cursor: pointer; user-select: none;
+      display: inline-flex; align-items: center; gap: 5px;
+      background: none; border: none; color: inherit;
+      font-family: inherit; font-size: inherit; font-weight: inherit;
+      padding: 0;
+    }
+    .city-chevron {
+      display: inline-block;
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .city-chevron.open { transform: rotate(180deg); }
+    .city-dropdown {
+      position: fixed;
+      background: #1c1c1c;
+      border: 1px solid rgba(255,184,0,0.25);
+      border-radius: 12px;
+      overflow: hidden;
+      min-width: 160px;
+      z-index: 200;
+      opacity: 0; pointer-events: none;
+      transform: translateY(-6px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .city-dropdown.open {
+      opacity: 1; pointer-events: auto; transform: translateY(0);
+    }
+    .city-option {
+      padding: 11px 16px; font-size: 13px; font-weight: 500;
+      color: var(--text-2); cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .city-option:hover { background: rgba(255,184,0,0.08); color: var(--text); }
+    .city-option.selected { color: var(--amber); }
+
+    /* ═══════════════════════════════════════
+       PARALLAX PROOF PHONES
+    ═══════════════════════════════════════ */
+    .proof-phone { will-change: transform; }
+
+    /* ═══════════════════════════════════════
+       3D TILT — desktop only
+    ═══════════════════════════════════════ */
+    @media (min-width: 1024px) {
+      .hero-phones {
+        perspective: 1200px;
+        transform-style: preserve-3d;
+      }
+      .hero-phone-front {
+        transition: transform 0.08s ease-out;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1010,9 +1102,23 @@
             </div>
           </div>
           <div class="hero-phone-front">
-            <div class="phone-frame">
+            <div class="phone-frame" id="heroPhoneFrame">
               <div class="phone-notch"></div>
-              <img src="screenshots/happymaps/IMG_0016_crop.PNG" alt="Tonight feed" />
+              <!-- height anchor — keeps frame from collapsing -->
+              <img class="phone-screen-anchor" src="screenshots/happymaps/IMG_0016_crop.PNG" alt="" aria-hidden="true" />
+              <!-- cycling screens -->
+              <img class="phone-screen active" src="screenshots/happymaps/IMG_0016_crop.PNG" alt="Tonight — Friends Going Out" />
+              <img class="phone-screen" src="screenshots/happymaps/IMG_0064_crop.PNG" alt="Tonight Feed" />
+              <img class="phone-screen" src="screenshots/happymaps/IMG_0017_crop.PNG" alt="Map View" />
+              <img class="phone-screen" src="screenshots/happymaps/IMG_0066_crop.PNG" alt="Groups" />
+              <img class="phone-screen" src="screenshots/happymaps/IMG_0070_crop.PNG" alt="Your Ratings" />
+            </div>
+            <div class="hero-screen-dots" id="heroScreenDots">
+              <div class="hero-dot active" data-idx="0"></div>
+              <div class="hero-dot" data-idx="1"></div>
+              <div class="hero-dot" data-idx="2"></div>
+              <div class="hero-dot" data-idx="3"></div>
+              <div class="hero-dot" data-idx="4"></div>
             </div>
           </div>
         </div>
@@ -1396,10 +1502,11 @@
           <span class="search-bar-text">
             <span id="search-placeholder"></span><span id="search-cursor"></span>
           </span>
-          <span class="search-bar-badge">
+          <button class="search-bar-badge" id="cityBadge" aria-haspopup="listbox" aria-expanded="false">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Los Angeles
-          </span>
+            <span id="cityLabel">Los Angeles</span>
+            <svg class="city-chevron" id="cityChevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
         </div>
         <div class="search-results" id="searchResults">
           <div class="search-result-row">
@@ -1730,6 +1837,193 @@
         const frame = item.querySelector('.phone-frame');
         if (frame) bindGlow(item, frame);
       });
+    })();
+
+    // ── 1. Touch/swipe support for carousel ──
+    (function () {
+      let touchStartX, touchScrollLeft;
+      track.addEventListener('touchstart', function (e) {
+        touchStartX   = e.touches[0].pageX - track.offsetLeft;
+        touchScrollLeft = track.scrollLeft;
+      }, { passive: true });
+      track.addEventListener('touchmove', function (e) {
+        const x = e.touches[0].pageX - track.offsetLeft;
+        track.scrollLeft = touchScrollLeft - (x - touchStartX) * 1.2;
+      }, { passive: true });
+    })();
+
+    // ── 2. Hero phone screen cycling ──
+    (function () {
+      const screens = document.querySelectorAll('#heroPhoneFrame .phone-screen');
+      const dots    = document.querySelectorAll('#heroScreenDots .hero-dot');
+      const frame   = document.getElementById('heroPhoneFrame');
+      if (!screens.length) return;
+      let current = 0, timer;
+
+      function goTo(idx) {
+        screens[current].classList.remove('active');
+        dots[current].classList.remove('active');
+        current = (idx + screens.length) % screens.length;
+        screens[current].classList.add('active');
+        dots[current].classList.add('active');
+      }
+
+      function startAuto() {
+        clearInterval(timer);
+        timer = setInterval(function () { goTo(current + 1); }, 3500);
+      }
+
+      dots.forEach(function (dot, i) {
+        dot.addEventListener('click', function (e) {
+          e.stopPropagation();
+          goTo(i);
+          startAuto();
+        });
+      });
+
+      frame.addEventListener('click', function () {
+        goTo(current + 1);
+        startAuto();
+      });
+
+      startAuto();
+    })();
+
+    // ── 3. 3D tilt on hero phone (desktop only) ──
+    (function () {
+      const heroPhones = document.querySelector('.hero-phones');
+      const frontPhone = document.querySelector('.hero-phone-front');
+      if (!heroPhones || !frontPhone) return;
+      const mqDesktop = window.matchMedia('(min-width: 1024px)');
+
+      heroPhones.addEventListener('mousemove', function (e) {
+        if (!mqDesktop.matches) return;
+        const rect = heroPhones.getBoundingClientRect();
+        const dx = (e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2);
+        const dy = (e.clientY - rect.top  - rect.height / 2) / (rect.height / 2);
+        frontPhone.style.animationPlayState = 'paused';
+        frontPhone.style.transform = 'rotate(3deg) rotateX(' + (dy * -7) + 'deg) rotateY(' + (dx * 10) + 'deg)';
+      });
+
+      heroPhones.addEventListener('mouseleave', function () {
+        frontPhone.style.animationPlayState = '';
+        frontPhone.style.transform = '';
+      });
+    })();
+
+    // ── 4. City switcher in search demo ──
+    (function () {
+      const cityData = {
+        'Los Angeles': [
+          { name: 'Belles Beach House', count: 78 },
+          { name: 'The Waterfront',     count: 52 },
+          { name: 'No Vacancy',         count: 31 },
+        ],
+        'New York': [
+          { name: 'The Wayland',        count: 94 },
+          { name: 'Smithfield Hall',    count: 67 },
+          { name: "Tanner Smith's",     count: 41 },
+        ],
+        'Chicago': [
+          { name: 'The Hangge-Uppe',    count: 83 },
+          { name: "Kincade's Bar",      count: 55 },
+          { name: "Duffy's Tavern",     count: 29 },
+        ],
+        'Austin': [
+          { name: '6th Street Live',    count: 112 },
+          { name: 'The White Horse',    count: 76 },
+          { name: 'Rainey St. Bar',     count: 48 },
+        ],
+      };
+
+      const badge    = document.getElementById('cityBadge');
+      const label    = document.getElementById('cityLabel');
+      const chevron  = document.getElementById('cityChevron');
+      const rows     = document.querySelectorAll('#searchResults .search-result-row');
+      if (!badge || !rows.length) return;
+
+      // Build dropdown and attach to body
+      const dropdown = document.createElement('div');
+      dropdown.className = 'city-dropdown';
+      dropdown.setAttribute('role', 'listbox');
+      Object.keys(cityData).forEach(function (city) {
+        const opt = document.createElement('div');
+        opt.className = 'city-option' + (city === 'Los Angeles' ? ' selected' : '');
+        opt.textContent = city;
+        opt.setAttribute('role', 'option');
+        opt.addEventListener('click', function () {
+          selectCity(city);
+          closeDropdown();
+        });
+        dropdown.appendChild(opt);
+      });
+      document.body.appendChild(dropdown);
+
+      function positionDropdown() {
+        const rect = badge.getBoundingClientRect();
+        dropdown.style.top  = (rect.bottom + 8 + window.scrollY) + 'px';
+        dropdown.style.left = (rect.right - dropdown.offsetWidth + window.scrollX) + 'px';
+        if (parseFloat(dropdown.style.left) < 8) dropdown.style.left = '8px';
+      }
+
+      function openDropdown() {
+        positionDropdown();
+        dropdown.classList.add('open');
+        chevron.classList.add('open');
+        badge.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeDropdown() {
+        dropdown.classList.remove('open');
+        chevron.classList.remove('open');
+        badge.setAttribute('aria-expanded', 'false');
+      }
+
+      badge.addEventListener('click', function (e) {
+        e.stopPropagation();
+        dropdown.classList.contains('open') ? closeDropdown() : openDropdown();
+      });
+
+      document.addEventListener('click', closeDropdown);
+
+      function selectCity(city) {
+        label.textContent = city;
+        dropdown.querySelectorAll('.city-option').forEach(function (opt) {
+          opt.classList.toggle('selected', opt.textContent === city);
+        });
+        // fade rows out, update, fade back in
+        rows.forEach(function (row) { row.style.opacity = '0'; row.style.transition = 'opacity 0.18s ease'; });
+        setTimeout(function () {
+          cityData[city].forEach(function (bar, i) {
+            const nameEl = rows[i].querySelector('.result-name');
+            const metaEl = rows[i].querySelector('.result-meta');
+            if (nameEl) nameEl.textContent = bar.name;
+            if (metaEl) metaEl.innerHTML = '<strong>' + bar.count + '</strong> going tonight';
+          });
+          rows.forEach(function (row) { row.style.opacity = '1'; });
+        }, 200);
+      }
+    })();
+
+    // ── 5. Parallax scroll on social proof phones (desktop only) ──
+    (function () {
+      const col = document.querySelector('.proof-phones-col');
+      if (!col) return;
+      const phone1  = col.children[0];
+      const phone2  = col.children[1];
+      const section = document.getElementById('social-proof');
+      const mqDesktop = window.matchMedia('(min-width: 1024px)');
+
+      function onScroll() {
+        if (!mqDesktop.matches) { phone1.style.transform = ''; phone2.style.transform = ''; return; }
+        const rect     = section.getBoundingClientRect();
+        const progress = Math.max(0, Math.min(1, -rect.top / (rect.height + window.innerHeight)));
+        phone1.style.transform = 'translateY(' + (20 - progress * 40) + 'px)';
+        phone2.style.transform = 'translateY(' + (progress * 24) + 'px)';
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
     })();
   </script>
 
