@@ -1161,12 +1161,12 @@
   }, { passive: true });
 
   var lasers = [
-    { base: -0.55, speed: 0.009,  speed2: 0.023, color: '255,179,0',  alpha: 0.18, width: 2.0 },
-    { base: -0.28, speed: 0.013,  speed2: 0.031, color: '255,107,53', alpha: 0.14, width: 1.5 },
-    { base: -0.05, speed: 0.007,  speed2: 0.019, color: '255,179,0',  alpha: 0.15, width: 1.5 },
-    { base:  0.15, speed: 0.011,  speed2: 0.027, color: '255,107,53', alpha: 0.11, width: 1.5 },
-    { base:  0.38, speed: 0.015,  speed2: 0.037, color: '255,179,0',  alpha: 0.14, width: 2.0 },
-    { base:  0.62, speed: 0.008,  speed2: 0.021, color: '255,220,80', alpha: 0.09, width: 1.0 },
+    { base: -0.55, speed: 0.018,  speed2: 0.041, color: '255,179,0',  alpha: 0.18, width: 2.0 },
+    { base: -0.28, speed: 0.024,  speed2: 0.057, color: '255,107,53', alpha: 0.14, width: 1.5 },
+    { base: -0.05, speed: 0.014,  speed2: 0.035, color: '255,179,0',  alpha: 0.15, width: 1.5 },
+    { base:  0.15, speed: 0.021,  speed2: 0.049, color: '255,107,53', alpha: 0.11, width: 1.5 },
+    { base:  0.38, speed: 0.028,  speed2: 0.063, color: '255,179,0',  alpha: 0.14, width: 2.0 },
+    { base:  0.62, speed: 0.016,  speed2: 0.038, color: '255,220,80', alpha: 0.09, width: 1.0 },
   ];
   var phases  = lasers.map(function (_, i) { return i * 1.1; });
   var phases2 = lasers.map(function (_, i) { return i * 2.7; });
@@ -1194,7 +1194,7 @@
     var oy = 0;
 
     lasers.forEach(function (l, i) {
-      var boost = Math.abs(scrollVel) * 0.02;
+      var boost = Math.abs(scrollVel) * 0.006;
       phases[i]  += l.speed  + boost;
       phases2[i] += l.speed2 + boost * 1.5;
       var osc = Math.sin(phases[i]) * 0.32 + Math.sin(phases2[i]) * 0.18;
