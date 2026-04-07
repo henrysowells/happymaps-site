@@ -1127,12 +1127,12 @@
           <div class="stat-label">Bars tracked</div>
         </div>
         <div class="stat-item reveal d1">
-          <div class="stat-number"><span class="stat-digit">20+</span></div>
-          <div class="stat-label">LA neighborhoods</div>
+          <div class="stat-number"><span class="stat-digit">7</span></div>
+          <div class="stat-label">Rating categories</div>
         </div>
         <div class="stat-item reveal d2">
           <div class="stat-number"><span class="stat-digit">4</span></div>
-          <div class="stat-label">Core features</div>
+          <div class="stat-label">Screens built for nightlife</div>
         </div>
         <div class="stat-item reveal d3">
           <div class="stat-number"><span class="stat-digit">0</span></div>
@@ -1451,15 +1451,15 @@
       <div class="download-content">
         <span class="label reveal">Get the app</span>
         <h2 class="reveal d1">
-          Your next great night<br />starts <span class="accent">here.</span>
+          See where everyone's<br />going <span class="accent">tonight.</span>
         </h2>
         <p>
           Download HappyMaps and see where tonight is happening in your city.
         </p>
         <div class="download-btns">
-          <a href="#" class="btn-primary">
+          <a href="#" class="btn-primary" style="opacity:0.6;cursor:default;pointer-events:none;">
             <img src="assets/images/HappyMapsAppIcon.png" style="width:22px;height:22px;border-radius:5px;flex-shrink:0;" alt="" />
-            Download on the App Store
+            Coming Soon to the App Store
           </a>
         </div>
       </div>
@@ -1606,7 +1606,7 @@
     }
 
     const statNumbers = document.querySelectorAll('.stat-number');
-    const statValues  = [500, 20, 4, 0];
+    const statValues  = [500, 7, 4, 0];
     const statsObserver = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
