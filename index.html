@@ -230,12 +230,61 @@
        HERO — single column, centered, mobile-first
     ═══════════════════════════════════════ */
     #hero {
-      padding: 108px 0 60px;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
       overflow: hidden;
       text-align: center;
       position: relative;
+      background: #0D0D0D;
     }
-    #hero > .container { position: relative; z-index: 1; }
+    .hero-content {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 0 20px; width: 100%;
+    }
+    /* ambient glow spots behind title */
+    .hero-ambient {
+      position: absolute; border-radius: 50%; pointer-events: none; z-index: 0;
+    }
+    #hero-glow-a {
+      width: 600px; height: 400px;
+      top: 5%; left: 50%; transform: translateX(-50%);
+      background: radial-gradient(ellipse, rgba(255,179,0,0.04) 0%, transparent 65%);
+    }
+    #hero-glow-b {
+      width: 320px; height: 320px;
+      top: 20%; left: 20%;
+      background: radial-gradient(circle, rgba(255,107,53,0.03) 0%, transparent 65%);
+    }
+    #hero-glow-c {
+      width: 280px; height: 280px;
+      top: 15%; right: 15%;
+      background: radial-gradient(circle, rgba(255,179,0,0.025) 0%, transparent 65%);
+    }
+    /* new title */
+    .hero-title-new {
+      font-family: 'Beon', sans-serif;
+      font-size: 48px; color: #FFB300;
+      letter-spacing: 2px; line-height: 1;
+      text-shadow: 0 0 60px rgba(255,179,0,0.3);
+      margin-bottom: 16px;
+    }
+    .hero-divider {
+      width: 120px; height: 1px;
+      background: #FFB300; opacity: 0.5;
+      margin: 0 auto 20px;
+    }
+    .hero-sub-new {
+      font-size: 18px; color: #F5F5F5;
+      text-align: center; margin-bottom: 32px;
+      line-height: 1.4; max-width: 360px;
+    }
+    /* phones section below hero */
+    #hero-phones-reveal {
+      background: #0D0D0D;
+      display: flex; justify-content: center;
+      padding: 40px 20px 72px;
+    }
 
     .hero-eyebrow {
       display: inline-flex; align-items: center; gap: 8px;
@@ -261,22 +310,9 @@
       transition: opacity 0.35s ease;
     }
 
-    .hero-title {
-      font-size: 38px; font-weight: 800;
-      line-height: 1.05; letter-spacing: -0.01em;
-      margin-bottom: 18px;
-    }
-
-    .hero-sub {
-      font-size: 16px; color: var(--text-2);
-      line-height: 1.65; margin-bottom: 28px;
-      max-width: 320px; margin-left: auto; margin-right: auto;
-    }
-
     .hero-ctas {
       display: flex; gap: 10px;
       justify-content: center; flex-wrap: wrap;
-      margin-bottom: 44px;
     }
 
     /* phone area */
@@ -728,9 +764,7 @@
       .nav-links { display: flex; }
 
       /* hero */
-      #hero { padding: 128px 0 72px; }
-      .hero-title { font-size: 48px; }
-      .hero-sub { max-width: 400px; font-size: 17px; }
+      .hero-title-new { font-size: 60px; }
 
       /* stats */
       .stats-grid { grid-template-columns: repeat(4,1fr); gap: 16px; }
@@ -772,24 +806,15 @@
       .section-header h2 { font-size: 52px; }
       .section-header { margin-bottom: 64px; }
 
-      /* ── hero: two-column layout ── */
-      #hero { padding: 140px 0 100px; text-align: left; }
+      /* ── hero: full-screen centered ── */
+      .hero-title-new { font-size: 72px; }
+      .hero-sub-new { font-size: 20px; max-width: 480px; }
 
-      .hero-layout {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 60px;
-        align-items: center;
-      }
-      .hero-sub { margin-left: 0; margin-right: 0; max-width: 480px; font-size: 18px; }
-      .hero-ctas { justify-content: flex-start; }
-      .hero-eyebrow { display: inline-flex; }
-
-      /* phones: both visible, overlapping */
+      /* phones below hero: both visible, overlapping */
+      #hero-phones-reveal { padding: 60px 0 100px; position: relative; }
       .hero-phones {
         position: relative;
-        height: 520px;
-        justify-content: flex-end;
+        height: 520px; width: 100%; max-width: 600px;
       }
       .hero-phone-front {
         width: 260px; max-width: 260px;
@@ -799,7 +824,7 @@
       .hero-phone-back {
         display: block;
         width: 230px;
-        position: absolute; right: 210px; bottom: 20px;
+        position: absolute; right: 240px; bottom: 20px;
         opacity: 0.6; filter: blur(0.5px);
         animation: floatBack 6s 1s ease-in-out infinite;
         will-change: transform;
@@ -1025,62 +1050,57 @@
   <!-- ── HERO ── -->
   <section id="hero">
     <canvas id="laserCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
-    <div class="container">
-      <div class="hero-layout">
-
-        <div class="hero-copy">
-          <div class="hero-eyebrow">
-            <div class="dot"></div>
-            <span id="eyebrow-text">Now available on iOS</span>
-          </div>
-          <h1 class="hero-title">
-            See where<br />the night<br />is <span class="accent accent-shimmer">happening.</span>
-          </h1>
-          <p class="hero-sub">
-            HappyMaps is the nightlife app for college students. See which bars are popping tonight, where your friends are going, and plan your night — all before you leave home.
-          </p>
-          <div class="hero-ctas">
-            <a href="#download" class="btn-primary">
-              <img src="assets/images/HappyMapsAppIcon.png" style="width:22px;height:22px;border-radius:5px;flex-shrink:0;" alt="" /> Download on iOS
-            </a>
-            <a href="#how-it-works" class="btn-secondary">
-              See how it works
-            </a>
-          </div>
-        </div>
-
-        <div class="hero-phones">
-          <div class="hero-phone-back">
-            <div class="phone-frame">
-              <div class="phone-notch"></div>
-              <img src="screenshots/happymaps/IMG_0017_crop.PNG" alt="Map view" />
-            </div>
-          </div>
-          <div class="hero-phone-front">
-            <div class="phone-frame" id="heroPhoneFrame">
-              <div class="phone-notch"></div>
-              <!-- height anchor — keeps frame from collapsing -->
-              <img class="phone-screen-anchor" src="screenshots/happymaps/IMG_0016_crop.PNG" alt="" aria-hidden="true" />
-              <!-- cycling screens -->
-              <img class="phone-screen active" src="screenshots/happymaps/IMG_0016_crop.PNG" alt="Tonight — Friends Going Out" />
-              <img class="phone-screen" src="screenshots/happymaps/IMG_0064_crop.PNG" alt="Tonight Feed" />
-              <img class="phone-screen" src="screenshots/happymaps/IMG_0017_crop.PNG" alt="Map View" />
-              <img class="phone-screen" src="screenshots/happymaps/IMG_0066_crop.PNG" alt="Groups" />
-              <img class="phone-screen" src="screenshots/happymaps/IMG_0070_crop.PNG" alt="Your Ratings" />
-            </div>
-            <div class="hero-screen-dots" id="heroScreenDots">
-              <div class="hero-dot active" data-idx="0"></div>
-              <div class="hero-dot" data-idx="1"></div>
-              <div class="hero-dot" data-idx="2"></div>
-              <div class="hero-dot" data-idx="3"></div>
-              <div class="hero-dot" data-idx="4"></div>
-            </div>
-          </div>
-        </div>
-
+    <div class="hero-ambient" id="hero-glow-a"></div>
+    <div class="hero-ambient" id="hero-glow-b"></div>
+    <div class="hero-ambient" id="hero-glow-c"></div>
+    <div class="hero-content" id="heroContent">
+      <div class="hero-eyebrow">
+        <div class="dot"></div>
+        <span id="eyebrow-text">Now available on iOS</span>
+      </div>
+      <h1 class="hero-title-new">HappyMaps</h1>
+      <div class="hero-divider"></div>
+      <p class="hero-sub-new">See where the night is happening.</p>
+      <div class="hero-ctas">
+        <a href="#download" class="btn-primary">
+          <img src="assets/images/HappyMapsAppIcon.png" style="width:22px;height:22px;border-radius:5px;flex-shrink:0;" alt="" /> Download on iOS
+        </a>
+        <a href="#how-it-works" class="btn-secondary">
+          See how it works
+        </a>
       </div>
     </div>
   </section>
+
+  <!-- ── PHONE MOCKUPS (below hero) ── -->
+  <div id="hero-phones-reveal">
+    <div class="hero-phones">
+      <div class="hero-phone-back">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <img src="screenshots/happymaps/IMG_0017_crop.PNG" alt="Map view" />
+        </div>
+      </div>
+      <div class="hero-phone-front">
+        <div class="phone-frame" id="heroPhoneFrame">
+          <div class="phone-notch"></div>
+          <img class="phone-screen-anchor" src="screenshots/happymaps/IMG_0016_crop.PNG" alt="" aria-hidden="true" />
+          <img class="phone-screen active" src="screenshots/happymaps/IMG_0016_crop.PNG" alt="Tonight — Friends Going Out" />
+          <img class="phone-screen" src="screenshots/happymaps/IMG_0064_crop.PNG" alt="Tonight Feed" />
+          <img class="phone-screen" src="screenshots/happymaps/IMG_0017_crop.PNG" alt="Map View" />
+          <img class="phone-screen" src="screenshots/happymaps/IMG_0066_crop.PNG" alt="Groups" />
+          <img class="phone-screen" src="screenshots/happymaps/IMG_0070_crop.PNG" alt="Your Ratings" />
+        </div>
+        <div class="hero-screen-dots" id="heroScreenDots">
+          <div class="hero-dot active" data-idx="0"></div>
+          <div class="hero-dot" data-idx="1"></div>
+          <div class="hero-dot" data-idx="2"></div>
+          <div class="hero-dot" data-idx="3"></div>
+          <div class="hero-dot" data-idx="4"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ── SOCIAL PROOF STRIP ── -->
   <div id="social-strip">
@@ -1913,52 +1933,89 @@
   </script>
 
   <script>
-    // ── Hero laser light effect ──
+    // ── Hero laser light effect (scroll-reactive) ──
     (function () {
-      const canvas = document.getElementById('laserCanvas');
-      const ctx = canvas.getContext('2d');
+      var canvas  = document.getElementById('laserCanvas');
+      var ctx     = canvas.getContext('2d');
+      var heroEl  = document.getElementById('hero');
+      var content = document.getElementById('heroContent');
 
       function resize() {
-        canvas.width = canvas.offsetWidth;
+        canvas.width  = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
       }
       resize();
       window.addEventListener('resize', resize);
 
-      const lasers = [
-        { x: 0.15, angle: 0.3,  speed: 0.004,  color: '255,179,0',   alpha: 0.12, width: 2   },
-        { x: 0.5,  angle: -0.5, speed: 0.003,  color: '255,107,53',  alpha: 0.08, width: 1.5 },
-        { x: 0.8,  angle: 0.8,  speed: 0.005,  color: '255,179,0',   alpha: 0.10, width: 1.5 },
-        { x: 0.3,  angle: -0.2, speed: 0.0035, color: '255,240,160', alpha: 0.06, width: 1   },
-        { x: 0.65, angle: 0.6,  speed: 0.006,  color: '255,179,0',   alpha: 0.08, width: 1   },
+      // 6 beams — all originate from a single top-center rig point
+      var lasers = [
+        { baseAngle: -0.55, speed: 0.0030, color: '255,179,0',  alpha: 0.15, width: 2.0 },
+        { baseAngle: -0.28, speed: 0.0040, color: '255,107,53', alpha: 0.12, width: 1.5 },
+        { baseAngle: -0.05, speed: 0.0025, color: '255,179,0',  alpha: 0.13, width: 1.5 },
+        { baseAngle:  0.15, speed: 0.0035, color: '255,107,53', alpha: 0.10, width: 1.5 },
+        { baseAngle:  0.38, speed: 0.0045, color: '255,179,0',  alpha: 0.12, width: 2.0 },
+        { baseAngle:  0.62, speed: 0.0028, color: '255,220,80', alpha: 0.08, width: 1.0 },
       ];
+      // running oscillation phases, one per laser
+      var phases = lasers.map(function (_, i) { return i * 1.1; });
 
-      let t = 0;
+      var scrollY = 0;
+      window.addEventListener('scroll', function () {
+        scrollY = window.scrollY;
+      }, { passive: true });
+
+      var t = 0;
 
       function draw() {
-        const w = canvas.width;
-        const h = canvas.height;
+        var w = canvas.width;
+        var h = canvas.height;
         ctx.clearRect(0, 0, w, h);
 
-        lasers.forEach(function (l, i) {
-          l.angle += l.speed * Math.sin(t * 0.7 + i * 1.3);
-          const ox = l.x * w;
-          const len = w * 2.5;
-          const ex = ox + Math.cos(Math.PI / 2 + l.angle) * len;
-          const ey = Math.sin(Math.PI / 2 + l.angle) * len;
+        // scroll progress 0→1 over the first half of the viewport
+        var heroH   = heroEl.offsetHeight;
+        var scrollT = Math.min(scrollY / (heroH * 0.5), 1);
 
-          const grad = ctx.createLinearGradient(ox, 0, ex, ey);
-          grad.addColorStop(0,   'rgba(' + l.color + ',' + l.alpha + ')');
-          grad.addColorStop(0.5, 'rgba(' + l.color + ',' + (l.alpha * 0.4) + ')');
-          grad.addColorStop(1,   'rgba(' + l.color + ',0)');
+        // origin moves from top-center downward as user scrolls
+        var ox = w * 0.5;
+        var oy = scrollY * 0.25; // parallax: moves down slower than scroll
+
+        lasers.forEach(function (l, i) {
+          // idle oscillation
+          phases[i] += l.speed;
+          var osc = Math.sin(phases[i]) * 0.18;
+
+          // scroll shifts all angles slightly outward
+          var scrollShift = (i - 2.5) * scrollT * 0.06;
+
+          var angle = l.baseAngle + osc + scrollShift;
+
+          var len = Math.sqrt(w * w + h * h) * 1.4;
+          var ex  = ox + Math.sin(angle) * len;
+          var ey  = oy + Math.cos(angle) * len;
+
+          var grad = ctx.createLinearGradient(ox, oy, ex, ey);
+          grad.addColorStop(0,    'rgba(' + l.color + ',' + l.alpha + ')');
+          grad.addColorStop(0.45, 'rgba(' + l.color + ',' + (l.alpha * 0.35) + ')');
+          grad.addColorStop(1,    'rgba(' + l.color + ',0)');
 
           ctx.beginPath();
-          ctx.moveTo(ox, 0);
+          ctx.moveTo(ox, oy);
           ctx.lineTo(ex, ey);
           ctx.strokeStyle = grad;
-          ctx.lineWidth = l.width;
+          ctx.lineWidth   = l.width;
           ctx.stroke();
         });
+
+        // fade hero content + canvas on scroll
+        var fadeOpacity = 1 - scrollT;
+        canvas.style.opacity  = fadeOpacity;
+        content.style.opacity = fadeOpacity;
+
+        // shift ambient glows slightly on scroll
+        var glowA = document.getElementById('hero-glow-a');
+        var glowB = document.getElementById('hero-glow-b');
+        if (glowA) glowA.style.transform = 'translateX(-50%) translateY(' + (scrollY * 0.08) + 'px)';
+        if (glowB) glowB.style.transform = 'translateY(' + (scrollY * 0.05) + 'px)';
 
         t += 0.016;
         requestAnimationFrame(draw);
