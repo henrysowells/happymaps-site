@@ -233,7 +233,9 @@
       padding: 108px 0 60px;
       overflow: hidden;
       text-align: center;
+      position: relative;
     }
+    #hero > .container { position: relative; z-index: 1; }
 
     .hero-eyebrow {
       display: inline-flex; align-items: center; gap: 8px;
@@ -1022,6 +1024,7 @@
 
   <!-- ── HERO ── -->
   <section id="hero">
+    <canvas id="laserCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
     <div class="container">
       <div class="hero-layout">
 
@@ -1906,6 +1909,62 @@
 
       window.addEventListener('scroll', onScroll, { passive: true });
       onScroll();
+    })();
+  </script>
+
+  <script>
+    // ── Hero laser light effect ──
+    (function () {
+      const canvas = document.getElementById('laserCanvas');
+      const ctx = canvas.getContext('2d');
+
+      function resize() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const lasers = [
+        { x: 0.15, angle: 0.3,  speed: 0.004,  color: '255,179,0',   alpha: 0.12, width: 2   },
+        { x: 0.5,  angle: -0.5, speed: 0.003,  color: '255,107,53',  alpha: 0.08, width: 1.5 },
+        { x: 0.8,  angle: 0.8,  speed: 0.005,  color: '255,179,0',   alpha: 0.10, width: 1.5 },
+        { x: 0.3,  angle: -0.2, speed: 0.0035, color: '255,240,160', alpha: 0.06, width: 1   },
+        { x: 0.65, angle: 0.6,  speed: 0.006,  color: '255,179,0',   alpha: 0.08, width: 1   },
+      ];
+
+      let t = 0;
+
+      function draw() {
+        const w = canvas.width;
+        const h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        lasers.forEach(function (l, i) {
+          l.angle += l.speed * Math.sin(t * 0.7 + i * 1.3);
+          const ox = l.x * w;
+          const len = w * 2.5;
+          const ex = ox + Math.cos(Math.PI / 2 + l.angle) * len;
+          const ey = Math.sin(Math.PI / 2 + l.angle) * len;
+
+          const grad = ctx.createLinearGradient(ox, 0, ex, ey);
+          grad.addColorStop(0,   'rgba(' + l.color + ',' + l.alpha + ')');
+          grad.addColorStop(0.5, 'rgba(' + l.color + ',' + (l.alpha * 0.4) + ')');
+          grad.addColorStop(1,   'rgba(' + l.color + ',0)');
+
+          ctx.beginPath();
+          ctx.moveTo(ox, 0);
+          ctx.lineTo(ex, ey);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = l.width;
+          ctx.stroke();
+        });
+
+        t += 0.016;
+        requestAnimationFrame(draw);
+      }
+
+      draw();
     })();
   </script>
 
