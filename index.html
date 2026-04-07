@@ -279,13 +279,6 @@
       text-align: center; margin-bottom: 32px;
       line-height: 1.4; max-width: 360px;
     }
-    /* phones section below hero */
-    #hero-phones-reveal {
-      background: #0D0D0D;
-      display: flex; justify-content: center;
-      padding: 40px 20px 72px;
-    }
-
     .hero-eyebrow {
       display: inline-flex; align-items: center; gap: 8px;
       background: var(--amber-glow);
@@ -314,115 +307,6 @@
       display: flex; gap: 10px;
       justify-content: center; flex-wrap: wrap;
     }
-
-    /* phone area */
-    .hero-phones {
-      display: flex; justify-content: center;
-      align-items: flex-end;
-    }
-    /* front phone: always visible, fluid width */
-    .hero-phone-front {
-      width: 80vw; max-width: 280px;
-      animation: floatPhone 6s ease-in-out infinite;
-      will-change: transform;
-    }
-    /* back phone: hidden until desktop */
-    .hero-phone-back { display: none; }
-
-    /* ═══════════════════════════════════════
-       SOCIAL PROOF STRIP
-    ═══════════════════════════════════════ */
-    #social-strip {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 0;
-    }
-    .social-strip-inner {
-      display: flex; align-items: center; justify-content: center;
-      gap: 12px;
-    }
-    .avatar-stack {
-      display: flex; align-items: center;
-      flex-shrink: 0;
-    }
-    .avatar {
-      width: 30px; height: 30px; border-radius: 50%;
-      background: var(--bg);
-      border: 2px solid var(--surface);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px; font-weight: 700; letter-spacing: 0.02em;
-      color: var(--amber);
-      margin-left: -8px;
-      flex-shrink: 0;
-    }
-    .avatar:first-child { margin-left: 0; }
-    .avatar:nth-child(1) { background: #1a1500; }
-    .avatar:nth-child(2) { background: #141a00; }
-    .avatar:nth-child(3) { background: #001a16; }
-    .avatar:nth-child(4) { background: #0f001a; }
-    .strip-text {
-      font-size: 14px; font-weight: 500; color: var(--text);
-      white-space: nowrap;
-    }
-    .strip-count {
-      color: var(--amber); font-weight: 700;
-      display: inline-block;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-    .strip-count.tick-out {
-      opacity: 0; transform: translateY(-6px);
-    }
-    .strip-count.tick-in {
-      opacity: 0; transform: translateY(6px);
-    }
-    .strip-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--amber);
-      flex-shrink: 0;
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    /* ═══════════════════════════════════════
-       STATS
-    ═══════════════════════════════════════ */
-    #stats {
-      padding: 40px 0;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      text-align: center;
-      align-items: start;
-    }
-    .stat-number {
-      font-size: 36px; font-weight: 800;
-      color: var(--amber); line-height: 1;
-      margin-bottom: 5px; letter-spacing: -0.02em;
-      overflow: hidden;
-    }
-    .stat-digit { display: block; }
-    @keyframes stat-tick {
-      from { transform: translateY(45%); opacity: 0; }
-      to   { transform: translateY(0);   opacity: 1; }
-    }
-    .stat-item { position: relative; }
-    .stat-item::after {
-      content: '';
-      position: absolute;
-      bottom: -8px; left: 50%;
-      transform: translateX(-50%);
-      height: 2px;
-      width: 0;
-      background: linear-gradient(90deg, transparent, var(--amber) 25%, var(--amber) 75%, transparent);
-      border-radius: 1px;
-      transition: width 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
-    }
-    .stat-item.stat-done::after { width: 52px; }
-    .stat-label { font-size: 13px; color: var(--text-2); font-weight: 500; }
 
     /* ═══════════════════════════════════════
        HOW IT WORKS
@@ -658,26 +542,6 @@
     .footer-links a:hover { color: var(--text-2); }
     .footer-copy { font-size: 12px; color: var(--text-3); }
 
-    /* ═══════════════════════════════════════
-       ANIMATIONS
-    ═══════════════════════════════════════ */
-    @keyframes floatPhone {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(-12px); }
-    }
-    @keyframes floatFront {
-      0%, 100% { transform: rotate(3deg) translateY(0); }
-      50%       { transform: rotate(3deg) translateY(-14px); }
-    }
-    @keyframes floatBack {
-      0%, 100% { transform: rotate(-6deg) translateY(0); }
-      50%       { transform: rotate(-6deg) translateY(-8px); }
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50%       { opacity: 0.6; transform: scale(1.2); }
-    }
-
     /* ─────────────────────────────────────────
        TABLET  768px+
     ───────────────────────────────────────── */
@@ -692,9 +556,6 @@
 
       /* hero */
       .hero-title-new { font-size: 60px; }
-
-      /* stats */
-      .stats-grid { grid-template-columns: repeat(4,1fr); gap: 16px; }
 
       /* how it works */
       #how-it-works { padding: 88px 0; }
@@ -727,26 +588,6 @@
       /* ── hero: full-screen centered ── */
       .hero-title-new { font-size: 72px; }
       .hero-sub-new { font-size: 20px; max-width: 480px; }
-
-      /* phones below hero: both visible, overlapping */
-      #hero-phones-reveal { padding: 60px 0 100px; position: relative; }
-      .hero-phones {
-        position: relative;
-        height: 520px; width: 100%; max-width: 600px;
-      }
-      .hero-phone-front {
-        width: 260px; max-width: 260px;
-        position: absolute; right: 0; bottom: 0;
-        animation: floatFront 6s ease-in-out infinite;
-      }
-      .hero-phone-back {
-        display: block;
-        width: 230px;
-        position: absolute; right: 240px; bottom: 20px;
-        opacity: 0.6; filter: blur(0.5px);
-        animation: floatBack 6s 1s ease-in-out infinite;
-        will-change: transform;
-      }
 
       /* steps — alternating text/image rows */
       #how-it-works { padding: 120px 0; }
@@ -893,18 +734,6 @@
     .city-option:hover { background: rgba(255,184,0,0.08); color: var(--text); }
     .city-option.selected { color: var(--amber); }
 
-    /* ═══════════════════════════════════════
-       3D TILT — desktop only
-    ═══════════════════════════════════════ */
-    @media (min-width: 1024px) {
-      .hero-phones {
-        perspective: 1200px;
-        transform-style: preserve-3d;
-      }
-      .hero-phone-front {
-        transition: transform 0.08s ease-out;
-      }
-    }
   </style>
 </head>
 <body>
@@ -949,73 +778,33 @@
     </div>
   </section>
 
-  <!-- ── PHONE MOCKUPS (below hero) ── -->
-  <div id="hero-phones-reveal">
-    <div class="hero-phones">
-      <div class="hero-phone-back">
+  <!-- ── SCREENSHOTS ── -->
+  <section id="screenshots">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="label">App screenshots</span>
+        <div class="divider"></div>
+        <h2>A look inside HappyMaps</h2>
+        <p>Every screen designed for the energy of a night out.</p>
+      </div>
+    </div>
+    <div class="sc-showcase">
+      <div class="sc-frame-wrap">
         <div class="phone-frame">
           <div class="phone-notch"></div>
-          <img src="screenshots/happymaps/IMG_0017_crop.PNG" alt="Map view" />
+          <img id="scActiveImg" class="sc-img" src="screenshots/happymaps/IMG_0064_crop.PNG" alt="Tonight feed" />
         </div>
       </div>
-      <div class="hero-phone-front">
-        <div class="phone-frame" id="heroPhoneFrame">
-          <div class="phone-notch"></div>
-          <img class="phone-screen-anchor" src="screenshots/happymaps/IMG_0016_crop.PNG" alt="" aria-hidden="true" />
-          <img class="phone-screen active" src="screenshots/happymaps/IMG_0016_crop.PNG" alt="Tonight — Friends Going Out" />
-          <img class="phone-screen" src="screenshots/happymaps/IMG_0064_crop.PNG" alt="Tonight Feed" />
-          <img class="phone-screen" src="screenshots/happymaps/IMG_0017_crop.PNG" alt="Map View" />
-          <img class="phone-screen" src="screenshots/happymaps/IMG_0066_crop.PNG" alt="Groups" />
-          <img class="phone-screen" src="screenshots/happymaps/IMG_0070_crop.PNG" alt="Your Ratings" />
-        </div>
-        <div class="hero-screen-dots" id="heroScreenDots">
-          <div class="hero-dot active" data-idx="0"></div>
-          <div class="hero-dot" data-idx="1"></div>
-          <div class="hero-dot" data-idx="2"></div>
-          <div class="hero-dot" data-idx="3"></div>
-          <div class="hero-dot" data-idx="4"></div>
-        </div>
+      <div class="sc-tabs" id="scTabs">
+        <button class="sc-tab active" data-idx="0">Tonight</button>
+        <button class="sc-tab" data-idx="1">Map</button>
+        <button class="sc-tab" data-idx="2">Groups</button>
+        <button class="sc-tab" data-idx="3">Crawls</button>
+        <button class="sc-tab" data-idx="4">Discover</button>
+        <button class="sc-tab" data-idx="5">Profile</button>
+        <button class="sc-tab" data-idx="6">Ratings</button>
       </div>
-    </div>
-  </div>
-
-  <!-- ── SOCIAL PROOF STRIP ── -->
-  <div id="social-strip">
-    <div class="container">
-      <div class="social-strip-inner">
-        <div class="strip-dot"></div>
-        <div class="avatar-stack">
-          <div class="avatar">HS</div>
-          <div class="avatar">JK</div>
-          <div class="avatar">MC</div>
-          <div class="avatar">SW</div>
-        </div>
-        <p class="strip-text"><span class="strip-count" id="strip-count">47</span> students going out in LA tonight</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── STATS ── -->
-  <section id="stats">
-    <div class="container">
-      <div class="stats-grid">
-        <div class="stat-item reveal">
-          <div class="stat-number"><span class="stat-digit">500+</span></div>
-          <div class="stat-label">Bars tracked</div>
-        </div>
-        <div class="stat-item reveal d1">
-          <div class="stat-number"><span class="stat-digit">7</span></div>
-          <div class="stat-label">Rating categories</div>
-        </div>
-        <div class="stat-item reveal d2">
-          <div class="stat-number"><span class="stat-digit">4</span></div>
-          <div class="stat-label">Screens built for nightlife</div>
-        </div>
-        <div class="stat-item reveal d3">
-          <div class="stat-number"><span class="stat-digit">0</span></div>
-          <div class="stat-label">Boring nights</div>
-        </div>
-      </div>
+      <p class="sc-caption" id="scCaption">See which bars are trending and where students are going tonight</p>
     </div>
   </section>
 
@@ -1070,36 +859,6 @@
           </div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- ── SCREENSHOTS ── -->
-  <section id="screenshots">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="label">App screenshots</span>
-        <div class="divider"></div>
-        <h2>A look inside HappyMaps</h2>
-        <p>Every screen designed for the energy of a night out.</p>
-      </div>
-    </div>
-    <div class="sc-showcase">
-      <div class="sc-frame-wrap">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <img id="scActiveImg" class="sc-img" src="screenshots/happymaps/IMG_0064_crop.PNG" alt="Tonight feed" />
-        </div>
-      </div>
-      <div class="sc-tabs" id="scTabs">
-        <button class="sc-tab active" data-idx="0">Tonight</button>
-        <button class="sc-tab" data-idx="1">Map</button>
-        <button class="sc-tab" data-idx="2">Groups</button>
-        <button class="sc-tab" data-idx="3">Crawls</button>
-        <button class="sc-tab" data-idx="4">Discover</button>
-        <button class="sc-tab" data-idx="5">Profile</button>
-        <button class="sc-tab" data-idx="6">Ratings</button>
-      </div>
-      <p class="sc-caption" id="scCaption">See which bars are trending and where students are going tonight</p>
     </div>
   </section>
 
@@ -1268,80 +1027,6 @@
       }, 3000);
     })();
 
-    // Counter animation with slot-machine tick + underline reveal
-    function animateCounter(el, target, duration = 1500) {
-      const digit   = el.querySelector('.stat-digit');
-      const isPlus  = digit.textContent.includes('+');
-      const statItem = el.closest('.stat-item');
-      let start     = null;
-      let lastValue = -1;
-
-      function triggerTick() {
-        digit.style.animation = 'none';
-        void digit.offsetWidth; // force reflow so animation restarts
-        digit.style.animation = 'stat-tick 0.09s ease-out';
-      }
-
-      function step(ts) {
-        if (!start) start = ts;
-        const progress = Math.min((ts - start) / duration, 1);
-        const eased    = 1 - Math.pow(1 - progress, 3);
-        const value    = Math.floor(eased * target);
-
-        if (value !== lastValue) {
-          digit.textContent = value + (isPlus && value > 0 ? '+' : '');
-          triggerTick();
-          lastValue = value;
-        }
-
-        if (progress < 1) {
-          requestAnimationFrame(step);
-        } else {
-          digit.textContent = target + (isPlus ? '+' : '');
-          triggerTick();
-          statItem.classList.add('stat-done');
-        }
-      }
-
-      requestAnimationFrame(step);
-    }
-
-    const statNumbers = document.querySelectorAll('.stat-number');
-    const statValues  = [500, 7, 4, 0];
-    const statsObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          statNumbers.forEach((el, i) => animateCounter(el, statValues[i]));
-          statsObserver.disconnect();
-        }
-      });
-    }, { threshold: 0.5 });
-    const statsSection = document.getElementById('stats');
-    if (statsSection) statsObserver.observe(statsSection);
-    // Social proof strip — cycling count with tick animation
-    (function () {
-      const el = document.getElementById('strip-count');
-      if (!el) return;
-      const counts = [47, 52, 61, 58];
-      let idx = 0;
-
-      function cycle() {
-        idx = (idx + 1) % counts.length;
-        // tick out
-        el.classList.add('tick-out');
-        setTimeout(() => {
-          el.textContent = counts[idx];
-          el.classList.remove('tick-out');
-          el.classList.add('tick-in');
-          // force reflow so tick-in transition fires
-          void el.offsetWidth;
-          el.classList.remove('tick-in');
-        }, 200);
-      }
-
-      setInterval(cycle, 8000);
-    })();
-
     // Search result rows staggered reveal
     (function () {
       const rows = document.querySelectorAll('#searchResults .search-result-row');
@@ -1440,66 +1125,7 @@
       stepCards.forEach(function (card) { bindGlow(card, card); });
     })();
 
-    // ── 2. Hero phone screen cycling ──
-    (function () {
-      const screens = document.querySelectorAll('#heroPhoneFrame .phone-screen');
-      const dots    = document.querySelectorAll('#heroScreenDots .hero-dot');
-      const frame   = document.getElementById('heroPhoneFrame');
-      if (!screens.length) return;
-      let current = 0, timer;
-
-      function goTo(idx) {
-        screens[current].classList.remove('active');
-        dots[current].classList.remove('active');
-        current = (idx + screens.length) % screens.length;
-        screens[current].classList.add('active');
-        dots[current].classList.add('active');
-      }
-
-      function startAuto() {
-        clearInterval(timer);
-        timer = setInterval(function () { goTo(current + 1); }, 3500);
-      }
-
-      dots.forEach(function (dot, i) {
-        dot.addEventListener('click', function (e) {
-          e.stopPropagation();
-          goTo(i);
-          startAuto();
-        });
-      });
-
-      frame.addEventListener('click', function () {
-        goTo(current + 1);
-        startAuto();
-      });
-
-      startAuto();
-    })();
-
-    // ── 3. 3D tilt on hero phone (desktop only) ──
-    (function () {
-      const heroPhones = document.querySelector('.hero-phones');
-      const frontPhone = document.querySelector('.hero-phone-front');
-      if (!heroPhones || !frontPhone) return;
-      const mqDesktop = window.matchMedia('(min-width: 1024px)');
-
-      heroPhones.addEventListener('mousemove', function (e) {
-        if (!mqDesktop.matches) return;
-        const rect = heroPhones.getBoundingClientRect();
-        const dx = (e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2);
-        const dy = (e.clientY - rect.top  - rect.height / 2) / (rect.height / 2);
-        frontPhone.style.animationPlayState = 'paused';
-        frontPhone.style.transform = 'rotate(3deg) rotateX(' + (dy * -7) + 'deg) rotateY(' + (dx * 10) + 'deg)';
-      });
-
-      heroPhones.addEventListener('mouseleave', function () {
-        frontPhone.style.animationPlayState = '';
-        frontPhone.style.transform = '';
-      });
-    })();
-
-    // ── 4. City switcher in search demo ──
+    // ── City switcher in search demo ──
     (function () {
       const cityData = {
         'Los Angeles': [
