@@ -230,7 +230,7 @@
        HERO — single column, centered, mobile-first
     ═══════════════════════════════════════ */
     #hero {
-      min-height: 150vh;
+      min-height: 120vh;
       overflow: hidden;
       text-align: center;
       position: relative;
@@ -1186,7 +1186,7 @@
       return;
     }
 
-    var fade = scrollT < 0.5 ? 1 : 1 - ((scrollT - 0.5) / 0.35);
+    var fade = scrollT < 0.3 ? 1 : 1 - ((scrollT - 0.3) / 0.25);
     canvas.style.opacity = fade;
     if (heroContent) heroContent.style.opacity = fade;
 
