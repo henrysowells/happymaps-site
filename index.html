@@ -1152,7 +1152,11 @@
   window.addEventListener('resize', resize);
 
   var scrollY = 0;
+  var scrollVel = 0;
+  var lastScrollY = 0;
   window.addEventListener('scroll', function () {
+    scrollVel = window.scrollY - lastScrollY;
+    lastScrollY = window.scrollY;
     scrollY = window.scrollY;
   }, { passive: true });
 
@@ -1190,8 +1194,9 @@
     var oy = 0;
 
     lasers.forEach(function (l, i) {
-      phases[i]  += l.speed;
-      phases2[i] += l.speed2;
+      var boost = Math.abs(scrollVel) * 0.004;
+      phases[i]  += l.speed  + boost;
+      phases2[i] += l.speed2 + boost * 1.5;
       var osc = Math.sin(phases[i]) * 0.32 + Math.sin(phases2[i]) * 0.18;
       var fan = (i - 2.5) * scrollT * 0.55;
       var sweep = scrollT * 0.8;
