@@ -351,13 +351,17 @@
     .sc-frame-wrap { width: 280px; }
     .sc-frame-wrap .phone-frame {
       width: 280px;
+      height: auto;
+      max-height: 75vh;
       border-radius: 36px;
       border: 1px solid #333;
       background: #0D0D0D;
+      overflow: hidden;
     }
 
     .sc-img {
-      width: 100%; display: block;
+      width: 100%; height: auto; display: block;
+      object-fit: contain;
       opacity: 1;
       transition: opacity 0.2s ease;
     }
@@ -391,7 +395,7 @@
 
     @media (max-width: 767px) {
       .sc-frame-wrap { width: 85vw; }
-      .sc-frame-wrap .phone-frame { width: 85vw; border-radius: 30px; }
+      .sc-frame-wrap .phone-frame { width: 85vw; height: auto; border-radius: 30px; }
     }
 
     /* ═══════════════════════════════════════
