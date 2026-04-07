@@ -356,11 +356,19 @@
     .sc-frame-wrap .phone-frame {
       width: 280px;
       height: auto;
-      max-height: 75vh;
       border-radius: 36px;
       border: 1px solid #333;
       background: #0D0D0D;
       overflow: hidden;
+    }
+    /* cover the iOS status bar (time, battery, signal) */
+    .sc-frame-wrap .phone-frame::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 48px;
+      background: #0D0D0D;
+      z-index: 5;
     }
 
     .sc-img {
