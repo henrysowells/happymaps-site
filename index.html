@@ -1326,28 +1326,27 @@
 
         // origin: top-center with parallax
         var ox = w * 0.5;
-        var oy = Math.min(scrollY * 0.5, canvas.height * 0.6);
+        var oy = Math.min(window.scrollY * 0.4, canvas.height * 0.5);
 
         // scroll progress — stays reactive through the screenshots section
         var screenshotsEl = document.getElementById('screenshots');
         var scrollEnd = screenshotsEl
           ? screenshotsEl.offsetTop + screenshotsEl.offsetHeight
           : heroEl.offsetHeight * 3;
-        var scrollT = Math.min(scrollY / (window.innerHeight * 2.5), 1);
+        var scrollT = Math.min(window.scrollY / (window.innerHeight * 2.5), 1);
 
         lasers.forEach(function (l, i) {
           phases[i] += l.speed;
           var osc = Math.sin(phases[i]) * 0.18;
-          var angle = l.baseAngle + osc;
 
           // fan beams outward from center as user scrolls
           var scrollShift = (i - 2.5) * scrollT * 0.35;
-          var sweepAngle  = scrollT * 0.6;
-          var displayAngle = angle + scrollShift + sweepAngle;
+          var sweepAngle  = scrollT * 0.5;
+          var angle = l.baseAngle + osc + scrollShift + sweepAngle;
 
           var len = Math.sqrt(w * w + h * h) * 1.4;
-          var ex  = ox + Math.sin(displayAngle) * len;
-          var ey  = oy + Math.cos(displayAngle) * len;
+          var ex  = ox + Math.sin(angle) * len;
+          var ey  = oy + Math.cos(angle) * len;
 
           var grad = ctx.createLinearGradient(ox, oy, ex, ey);
           grad.addColorStop(0,    'rgba(' + l.color + ',' + l.alpha + ')');
@@ -1365,11 +1364,11 @@
         // draw strobe bursts
         drawStrobe(now);
 
-        // fade both canvases + hero content together
-        var fadeOpacity = 1 - scrollT;
-        canvas.style.opacity       = fadeOpacity;
-        strobeCanvas.style.opacity = fadeOpacity;
-        content.style.opacity      = fadeOpacity;
+        // fade both canvases + hero content together (hold full opacity until 60% through)
+        var fadeOpacity = scrollT < 0.6 ? 1 : 1 - ((scrollT - 0.6) / 0.4);
+        canvas.style.opacity       = Math.max(0, fadeOpacity);
+        strobeCanvas.style.opacity = Math.max(0, fadeOpacity);
+        content.style.opacity      = Math.max(0, fadeOpacity);
 
         // shift ambient glows slightly on scroll
         var glowA = document.getElementById('hero-glow-a');
