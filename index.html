@@ -1971,27 +1971,27 @@
         var h = canvas.height;
         ctx.clearRect(0, 0, w, h);
 
-        // scroll progress 0→1 over the first half of the viewport
-        var heroH   = heroEl.offsetHeight;
-        var scrollT = Math.min(scrollY / (heroH * 0.5), 1);
-
-        // origin moves from top-center downward as user scrolls
+        // origin: top-center, slides down with scroll (capped at 40% of canvas height)
         var ox = w * 0.5;
-        var oy = scrollY * 0.25; // parallax: moves down slower than scroll
+        var oy = Math.min(scrollY * 0.3, h * 0.4);
+
+        // scroll fans beams outward — alternates left/right per beam index
+        var scrollShift = scrollY * 0.0008;
 
         lasers.forEach(function (l, i) {
-          // idle oscillation
+          // idle oscillation (keeps running alongside scroll)
           phases[i] += l.speed;
           var osc = Math.sin(phases[i]) * 0.18;
 
-          // scroll shifts all angles slightly outward
-          var scrollShift = (i - 2.5) * scrollT * 0.06;
+          // base angle + oscillation
+          var angle = l.baseAngle + osc;
 
-          var angle = l.baseAngle + osc + scrollShift;
+          // apply scroll as a display-only offset, alternating direction per beam
+          var displayAngle = angle + (i % 2 === 0 ? scrollShift : -scrollShift);
 
           var len = Math.sqrt(w * w + h * h) * 1.4;
-          var ex  = ox + Math.sin(angle) * len;
-          var ey  = oy + Math.cos(angle) * len;
+          var ex  = ox + Math.sin(displayAngle) * len;
+          var ey  = oy + Math.cos(displayAngle) * len;
 
           var grad = ctx.createLinearGradient(ox, oy, ex, ey);
           grad.addColorStop(0,    'rgba(' + l.color + ',' + l.alpha + ')');
@@ -2006,12 +2006,13 @@
           ctx.stroke();
         });
 
-        // fade hero content + canvas on scroll
-        var fadeOpacity = 1 - scrollT;
-        canvas.style.opacity  = fadeOpacity;
-        content.style.opacity = fadeOpacity;
+        // fade canvas + hero content out over first 60% of hero height
+        var heroH       = heroEl.offsetHeight;
+        var fadeProgress = Math.min(scrollY / (heroH * 0.6), 1);
+        canvas.style.opacity  = 1 - fadeProgress;
+        content.style.opacity = 1 - fadeProgress;
 
-        // shift ambient glows slightly on scroll
+        // shift ambient glows slightly on scroll (slower parallax)
         var glowA = document.getElementById('hero-glow-a');
         var glowB = document.getElementById('hero-glow-b');
         if (glowA) glowA.style.transform = 'translateX(-50%) translateY(' + (scrollY * 0.08) + 'px)';
