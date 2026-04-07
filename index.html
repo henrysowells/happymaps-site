@@ -455,50 +455,6 @@
     .step-screenshot img { width: 100%; display: block; }
 
     /* ═══════════════════════════════════════
-       FEATURES
-    ═══════════════════════════════════════ */
-    #features { padding: 64px 0; background: var(--surface); }
-
-    .features-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-
-    .feature-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--r-lg);
-      padding: 24px 20px; text-align: center;
-      transition: border-color 0.3s;
-    }
-    .feature-card.highlight {
-      background: linear-gradient(135deg, rgba(255,184,0,0.08) 0%, rgba(255,184,0,0.02) 100%);
-      border-color: rgba(255,184,0,0.3);
-    }
-    .feature-icon {
-      display: block; margin: 0 auto 14px;
-      width: 32px; height: 32px;
-      color: var(--amber);
-      transition: filter 0.25s ease;
-    }
-    .feature-icon svg { width: 100%; height: 100%; display: block; }
-    .feature-card:hover .feature-icon {
-      filter: drop-shadow(0 0 7px rgba(255,184,0,0.7));
-    }
-    .feature-card {
-      transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
-    }
-    .feature-card:hover {
-      box-shadow: inset 3px 0 0 var(--amber), 0 0 40px rgba(255,184,0,0.07);
-    }
-    /* staggered feature reveal */
-    .feat-reveal {
-      opacity: 0; transform: translateY(20px);
-      transition: opacity 0.55s ease, transform 0.55s ease;
-      will-change: opacity, transform;
-    }
-    .feat-reveal.visible { opacity: 1; transform: translateY(0); }
-    .feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.01em; }
-    .feature-card p { font-size: 14px; color: var(--text-2); line-height: 1.65; }
-
-    /* ═══════════════════════════════════════
        SCREENSHOTS — single showcase
     ═══════════════════════════════════════ */
     #screenshots { padding: 64px 0 48px; display: flex; flex-direction: column; align-items: center; }
@@ -553,35 +509,6 @@
       .sc-frame-wrap { width: 85vw; }
       .sc-frame-wrap .phone-frame { width: 85vw; border-radius: 30px; }
     }
-
-    /* ═══════════════════════════════════════
-       SOCIAL PROOF
-    ═══════════════════════════════════════ */
-    #social-proof { padding: 32px 0 64px; background: var(--surface); }
-
-    /* phones column hidden on mobile */
-    .proof-phones-col { display: none; }
-
-    .proof-text .label { margin-bottom: 12px; }
-    .proof-text h2 {
-      font-size: 28px; font-weight: 800;
-      letter-spacing: -0.03em; margin-bottom: 14px; line-height: 1.1;
-    }
-    .proof-text h2 em { font-style: normal; color: var(--amber); }
-    .proof-text p { font-size: 15px; color: var(--text-2); line-height: 1.7; margin-bottom: 12px; }
-
-    .proof-pills {
-      display: flex; flex-wrap: wrap; gap: 8px;
-      margin-top: 22px; justify-content: center;
-    }
-    .pill {
-      display: inline-flex; align-items: center; gap: 7px;
-      padding: 8px 14px; border-radius: 100px;
-      border: 1px solid var(--border);
-      font-size: 13px; font-weight: 500;
-      color: var(--text-2); background: var(--bg);
-    }
-    .pill .dot { width: 5px; height: 5px; background: var(--amber); border-radius: 50%; flex-shrink: 0; }
 
     /* ═══════════════════════════════════════
        SEARCH DEMO
@@ -773,17 +700,8 @@
       #how-it-works { padding: 88px 0; }
       .steps-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
 
-      /* features */
-      #features { padding: 88px 0; }
-      .features-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-
       /* screenshots */
       #screenshots { padding: 88px 0 48px; }
-
-      /* social proof */
-      #social-proof { padding: 40px 0 88px; }
-      .proof-text h2 { font-size: 34px; }
-      .proof-pills { justify-content: flex-start; }
 
       /* search demo */
       #search-demo { padding: 96px 0; }
@@ -852,35 +770,8 @@
       /* even steps: image left, text right */
       .step-card:nth-child(even) .step-screenshot { order: -1; }
 
-      /* features */
-      #features { padding: 120px 0; }
-      .features-grid { grid-template-columns: repeat(3,1fr); gap: 16px; }
-      .feature-card { text-align: left; }
-      .feature-icon { margin: 0 0 14px; }
-
       /* screenshots */
       #screenshots { padding: 120px 0 64px; }
-
-      /* social proof: two-column */
-      #social-proof { padding: 48px 0 120px; }
-      .proof-layout {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 80px;
-        align-items: center;
-      }
-      .proof-phones-col {
-        display: flex;
-        gap: 16px;
-        align-items: flex-end;
-      }
-      .proof-phone {
-        flex: 1;
-      }
-      .proof-phone:first-child { transform: translateY(20px); }
-      .proof-text { text-align: left; }
-      .proof-pills { justify-content: flex-start; }
-      .proof-text h2 { font-size: 48px; }
 
       /* search demo */
       #search-demo { padding: 120px 0; }
@@ -892,20 +783,17 @@
 
       /* hover interactions */
       .step-card:hover { border-color: rgba(255,184,0,0.3); transform: translateY(-4px); transition: border-color 0.3s, transform 0.3s; }
-      .feature-card:hover { box-shadow: inset 3px 0 0 var(--amber), 0 0 40px rgba(255,184,0,0.07); transform: translateY(-3px); }
     }
 
     /* ═══════════════════════════════════════
        AMBER SPOTLIGHT / GLOW CARD EFFECT
     ═══════════════════════════════════════ */
-    .step-card,
-    .feature-card {
+    .step-card {
       overflow: hidden;
     }
 
     /* Spotlight layer — sits behind card content */
-    .step-card::before,
-    .feature-card::before {
+    .step-card::before {
       content: '';
       position: absolute;
       inset: 0;
@@ -922,8 +810,7 @@
     }
 
     /* Lift card content above the spotlight layer */
-    .step-card > *,
-    .feature-card > * {
+    .step-card > * {
       position: relative;
       z-index: 1;
     }
@@ -931,10 +818,6 @@
     /* Border brightens when spotlight is active */
     .step-card.glow-active {
       border-color: rgba(255, 184, 0, 0.28) !important;
-    }
-    .feature-card.glow-active {
-      border-color: rgba(255, 184, 0, 0.28) !important;
-      box-shadow: 0 0 32px rgba(255, 184, 0, 0.06);
     }
     /* ═══════════════════════════════════════
        HERO PHONE SCREEN CYCLING
@@ -1011,11 +894,6 @@
     .city-option.selected { color: var(--amber); }
 
     /* ═══════════════════════════════════════
-       PARALLAX PROOF PHONES
-    ═══════════════════════════════════════ */
-    .proof-phone { will-change: transform; }
-
-    /* ═══════════════════════════════════════
        3D TILT — desktop only
     ═══════════════════════════════════════ */
     @media (min-width: 1024px) {
@@ -1040,7 +918,6 @@
       </a>
       <ul class="nav-links">
         <li><a href="#how-it-works">How it works</a></li>
-        <li><a href="#features">Features</a></li>
         <li><a href="#screenshots">Screenshots</a></li>
         <li><a href="#download" class="btn-nav">Download</a></li>
       </ul>
@@ -1148,8 +1025,8 @@
       <div class="section-header reveal">
         <span class="label">How it works</span>
         <div class="divider"></div>
-        <h2>Four steps to a perfect night</h2>
-        <p>From discovery to morning-after bragging rights — HappyMaps has your whole night covered.</p>
+        <h2>Everything you need for a great night out</h2>
+        <p>Built for the way college students actually go out — spontaneous, social, and always moving.</p>
       </div>
       <div class="steps-grid">
         <div class="step-card reveal">
@@ -1196,75 +1073,6 @@
     </div>
   </section>
 
-  <!-- ── FEATURES ── -->
-  <section id="features">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="label">Features</span>
-        <div class="divider"></div>
-        <h2>Everything for a great night out</h2>
-        <p>Built for the way college students actually plan their nights — social, spontaneous, and always moving.</p>
-      </div>
-      <div class="features-grid">
-        <div class="feature-card highlight feat-reveal">
-          <span class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
-            </svg>
-          </span>
-          <h3>Tonight Feed &amp; Trending</h3>
-          <p>See which bars are picking up, getting busy, or on fire right now. The Tonight feed ranks bars by live student activity so you always know where the energy is.</p>
-        </div>
-        <div class="feature-card feat-reveal">
-          <span class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
-            </svg>
-          </span>
-          <h3>College Student Breakdown</h3>
-          <p>See exactly how many students from your school are planning to go to each bar tonight. A private signal just for your campus community.</p>
-        </div>
-        <div class="feature-card feat-reveal">
-          <span class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-          </span>
-          <h3>Groups &amp; Voting</h3>
-          <p>Create a private group with your crew, see where each member is going tonight, and put the bar decision to a democratic vote. The organizer approves every member.</p>
-        </div>
-        <div class="feature-card feat-reveal">
-          <span class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>
-            </svg>
-          </span>
-          <h3>Live Map View</h3>
-          <p>Explore bars across your city on a live map. Pins are color-coded by activity level — Quiet, Picking Up, Busy, or Most Popular Tonight.</p>
-        </div>
-        <div class="feature-card feat-reveal">
-          <span class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-            </svg>
-          </span>
-          <h3>Subcategory Ratings</h3>
-          <p>Rate every bar across 7 categories and build your personal nightlife record. See your top bar for Drinks, Music, Crowd, and more — and share your ratings as a beautiful card.</p>
-        </div>
-        <div class="feature-card feat-reveal">
-          <span class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-            </svg>
-          </span>
-          <h3>Your Nightlife Profile</h3>
-          <p>Track your nights out, bars visited, and crawls. See tonight's plan right on your profile, and share your top picks with friends.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ── SCREENSHOTS ── -->
   <section id="screenshots">
     <div class="container">
@@ -1292,113 +1100,6 @@
         <button class="sc-tab" data-idx="6">Ratings</button>
       </div>
       <p class="sc-caption" id="scCaption">See which bars are trending and where students are going tonight</p>
-    </div>
-  </section>
-
-  <!-- ── SOCIAL PROOF ── -->
-  <section id="social-proof">
-    <div class="container">
-      <div class="proof-layout">
-
-        <!-- Desktop-only phone column -->
-        <div class="proof-phones-col">
-          <div class="proof-phone">
-            <div class="phone-frame">
-              <div class="phone-notch"></div>
-              <img src="screenshots/happymaps/IMG_0069_crop.PNG" alt="Profile" />
-              <!-- REMOVED SVG MOCKUP
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" style="width:100%;display:block;" font-family="'DM Sans',sans-serif">
-                <rect width="390" height="844" fill="#F2F2F7"/>
-                <rect width="390" height="142" fill="#F5B800"/>
-                <text x="22" y="30" font-size="15" font-weight="600" fill="#1C1C1E">9:52</text>
-                <circle cx="355" cy="82" r="22" fill="rgba(255,255,255,0.85)"/>
-                <text x="355" y="89" font-size="16" text-anchor="middle" dominant-baseline="middle">⚙️</text>
-                <circle cx="195" cy="188" r="52" fill="white"/>
-                <circle cx="195" cy="188" r="46" fill="#1C1C1E"/>
-                <text x="195" y="206" font-size="42" font-weight="800" fill="white" text-anchor="middle">O</text>
-                <circle cx="232" cy="222" r="13" fill="#F5B800" stroke="white" stroke-width="2"/>
-                <text x="232" y="228" font-size="11" text-anchor="middle">🎓</text>
-                <text x="195" y="260" font-size="26" font-weight="800" fill="#1C1C1E" text-anchor="middle">Owen</text>
-                <text x="195" y="280" font-size="14" fill="#8E8E93" text-anchor="middle">@owenpentz</text>
-                <text x="195" y="298" font-size="13" font-weight="600" fill="#1C1C1E" text-anchor="middle">UCLA 🐻</text>
-                <rect x="20" y="310" width="164" height="36" rx="18" fill="white" stroke="#DCDCDC" stroke-width="1.5"/>
-                <text x="102" y="332" font-size="13" font-weight="600" fill="#1C1C1E" text-anchor="middle">Share Profile</text>
-                <rect x="192" y="310" width="178" height="36" rx="18" fill="white" stroke="#DCDCDC" stroke-width="1.5"/>
-                <text x="281" y="332" font-size="13" font-weight="600" fill="#1C1C1E" text-anchor="middle">Friends (8)</text>
-                <text x="20" y="498" font-size="18" font-weight="800" fill="#1C1C1E">Tonight's Plan</text>
-                <rect x="12" y="506" width="366" height="56" rx="14" fill="white"/>
-                <rect x="12" y="508" width="5" height="52" rx="2" fill="#F5B800"/>
-                <text x="30" y="530" font-size="15" font-weight="700" fill="#1C1C1E">Belles Beach House</text>
-                <text x="30" y="548" font-size="13" fill="#8E8E93">Venice Beach</text>
-                <text x="20" y="586" font-size="18" font-weight="800" fill="#1C1C1E">Friends Going Out Tonight</text>
-                <rect x="12" y="596" width="366" height="54" rx="12" fill="white"/>
-                <circle cx="50" cy="623" r="19" fill="#4ECDC4"/>
-                <text x="50" y="629" font-size="12" font-weight="700" fill="white" text-anchor="middle">HS</text>
-                <text x="80" y="617" font-size="14" font-weight="600" fill="#1C1C1E">Henry Sowells</text>
-                <text x="80" y="636" font-size="12" fill="#8E8E93">Belles Beach House</text>
-                <text x="364" y="627" font-size="18" fill="#C7C7CC" text-anchor="middle">›</text>
-                <rect x="12" y="656" width="366" height="54" rx="12" fill="white"/>
-                <circle cx="50" cy="683" r="19" fill="#FF6B6B"/>
-                <text x="50" y="689" font-size="12" font-weight="700" fill="white" text-anchor="middle">SM</text>
-                <text x="80" y="677" font-size="14" font-weight="600" fill="#1C1C1E">Sofia Martinez</text>
-                <text x="80" y="696" font-size="12" fill="#8E8E93">Bar Lubitsch</text>
-                <text x="364" y="687" font-size="18" fill="#C7C7CC" text-anchor="middle">›</text>
-                <rect x="12" y="716" width="366" height="54" rx="12" fill="white"/>
-                <circle cx="50" cy="743" r="19" fill="#45B7D1"/>
-                <text x="50" y="749" font-size="12" font-weight="700" fill="white" text-anchor="middle">JK</text>
-                <text x="80" y="737" font-size="14" font-weight="600" fill="#1C1C1E">Jake Kim</text>
-                <text x="80" y="756" font-size="12" fill="#8E8E93">No Vacancy</text>
-                <text x="364" y="747" font-size="18" fill="#C7C7CC" text-anchor="middle">›</text>
-                <rect x="12" y="776" width="366" height="54" rx="12" fill="white"/>
-                <circle cx="50" cy="800" r="19" fill="#DDA0DD"/>
-                <text x="50" y="806" font-size="12" font-weight="700" fill="white" text-anchor="middle">MC</text>
-                <text x="80" y="795" font-size="14" font-weight="600" fill="#1C1C1E">Mia Chen</text>
-                <text x="80" y="814" font-size="12" fill="#8E8E93">Employees Only</text>
-                <rect x="0" y="796" width="390" height="48" fill="white"/>
-                <line x1="0" y1="796" x2="390" y2="796" stroke="#DCDCDC" stroke-width="0.5"/>
-                <text x="39" y="820" font-size="18" text-anchor="middle">🍸</text>
-                <text x="39" y="836" font-size="10" fill="#8E8E93" text-anchor="middle">Tonight</text>
-                <text x="117" y="820" font-size="18" text-anchor="middle">🧭</text>
-                <text x="117" y="836" font-size="10" fill="#8E8E93" text-anchor="middle">Discover</text>
-                <text x="195" y="820" font-size="18" text-anchor="middle">🗺️</text>
-                <text x="195" y="836" font-size="10" fill="#8E8E93" text-anchor="middle">Map</text>
-                <text x="273" y="820" font-size="18" text-anchor="middle">🚶</text>
-                <text x="273" y="836" font-size="10" fill="#8E8E93" text-anchor="middle">Crawls</text>
-                <circle cx="351" cy="814" r="16" fill="#FFF5CC"/>
-                <text x="351" y="820" font-size="18" text-anchor="middle">👤</text>
-                <text x="351" y="836" font-size="10" font-weight="600" fill="#F5B800" text-anchor="middle">Profile</text>
-              </svg> -->
-            </div>
-          </div>
-          <div class="proof-phone">
-            <div class="phone-frame">
-              <div class="phone-notch"></div>
-              <img src="screenshots/happymaps/IMG_0070_crop.PNG" alt="Your Ratings" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Copy: always visible -->
-        <div class="proof-text reveal">
-          <span class="label">Built for college students</span>
-          <h2>Finally, a nightlife app that <em>gets it.</em></h2>
-          <p>
-            Most bar apps are built for people who plan in advance. HappyMaps is built for the way college students actually go out — last minute, with friends, wanting to know where the energy is <em>right now.</em>
-          </p>
-          <p>
-            Whether you're a freshman discovering your city or a senior with a regular crew, HappyMaps helps you own every night out and build memories worth looking back on.
-          </p>
-          <div class="proof-pills">
-            <div class="pill"><span class="dot"></span> Verified college email login</div>
-            <div class="pill"><span class="dot"></span> Tonight feed &amp; trending</div>
-            <div class="pill"><span class="dot"></span> Friends going out tonight</div>
-            <div class="pill"><span class="dot"></span> Groups &amp; voting</div>
-            <div class="pill"><span class="dot"></span> 7-category bar ratings</div>
-            <div class="pill"><span class="dot"></span> Live map with activity pins</div>
-          </div>
-        </div>
-
-      </div>
     </div>
   </section>
 
@@ -1641,22 +1342,6 @@
       setInterval(cycle, 8000);
     })();
 
-    // Features staggered reveal (80 ms per card)
-    const featCards = document.querySelectorAll('.feat-reveal');
-    if (featCards.length) {
-      const featObserver = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            featCards.forEach((card, i) => {
-              setTimeout(() => card.classList.add('visible'), i * 80);
-            });
-            featObserver.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-      featObserver.observe(document.getElementById('features'));
-    }
-
     // Search result rows staggered reveal
     (function () {
       const rows = document.querySelectorAll('#searchResults .search-result-row');
@@ -1737,7 +1422,6 @@
     (function () {
       // Cards where the glow tracks the cursor
       const stepCards    = document.querySelectorAll('.step-card');
-      const featureCards = document.querySelectorAll('.feature-card');
       function bindGlow(card, glowTarget) {
         card.addEventListener('mousemove', function (e) {
           const rect = glowTarget.getBoundingClientRect();
@@ -1754,7 +1438,6 @@
       }
 
       stepCards.forEach(function (card) { bindGlow(card, card); });
-      featureCards.forEach(function (card) { bindGlow(card, card); });
     })();
 
     // ── 2. Hero phone screen cycling ──
@@ -1910,26 +1593,6 @@
       }
     })();
 
-    // ── 5. Parallax scroll on social proof phones (desktop only) ──
-    (function () {
-      const col = document.querySelector('.proof-phones-col');
-      if (!col) return;
-      const phone1  = col.children[0];
-      const phone2  = col.children[1];
-      const section = document.getElementById('social-proof');
-      const mqDesktop = window.matchMedia('(min-width: 1024px)');
-
-      function onScroll() {
-        if (!mqDesktop.matches) { phone1.style.transform = ''; phone2.style.transform = ''; return; }
-        const rect     = section.getBoundingClientRect();
-        const progress = Math.max(0, Math.min(1, -rect.top / (rect.height + window.innerHeight)));
-        phone1.style.transform = 'translateY(' + (20 - progress * 40) + 'px)';
-        phone2.style.transform = 'translateY(' + (progress * 24) + 'px)';
-      }
-
-      window.addEventListener('scroll', onScroll, { passive: true });
-      onScroll();
-    })();
   </script>
 
   <script>
