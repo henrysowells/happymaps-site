@@ -237,9 +237,10 @@
       background: #0D0D0D;
     }
     .hero-content {
-      position: sticky;
-      top: 0;
-      height: 100vh;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       z-index: 2;
       display: flex; flex-direction: column; align-items: center;
       justify-content: center;
@@ -1175,15 +1176,14 @@
 
     if (scrollY > heroH + 100) {
       canvas.style.opacity = '0';
+      if (heroContent) heroContent.style.opacity = '0';
       requestAnimationFrame(draw);
       return;
     }
 
-    var fade = scrollT < 0.8 ? 1 : 1 - ((scrollT - 0.8) / 0.2);
+    var fade = scrollT < 0.85 ? 1 : 1 - ((scrollT - 0.85) / 0.15);
     canvas.style.opacity = fade;
-    if (heroContent) {
-      heroContent.style.opacity = fade;
-    }
+    if (heroContent) heroContent.style.opacity = fade;
 
     var ox = w * 0.5;
     var oy = 0;
