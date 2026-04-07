@@ -240,7 +240,7 @@
       position: sticky;
       top: 50vh;
       transform: translateY(-50%);
-      z-index: 1;
+      z-index: 2;
       display: flex; flex-direction: column; align-items: center;
       padding: 0 20px; width: 100%;
     }
@@ -1128,162 +1128,93 @@
   </script>
 
   <script>
-    // ── Hero laser light effect + club strobe (scroll-reactive) ──
     (function () {
-      var canvas       = document.getElementById('laserCanvas');
-      var ctx          = canvas.getContext('2d');
-      var strobeCanvas = document.getElementById('strobeCanvas');
-      var strobeCtx    = strobeCanvas.getContext('2d');
-      var heroEl       = document.getElementById('hero');
-      var content      = document.getElementById('heroContent');
+  var canvas = document.getElementById('laserCanvas');
+  var ctx = canvas.getContext('2d');
+  var heroContent = document.getElementById('heroContent');
+  var heroEl = document.getElementById('hero');
 
-      function resize() {
-        canvas.width        = canvas.offsetWidth;
-        canvas.height       = canvas.offsetHeight;
-        strobeCanvas.width  = window.innerWidth;
-        strobeCanvas.height = window.innerHeight;
-      }
-      resize();
-      window.addEventListener('resize', resize);
+  canvas.style.position = 'fixed';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvas.style.zIndex = '0';
+  canvas.style.pointerEvents = 'none';
 
-      // 6 beams — all originate from a single top-center rig point
-      var lasers = [
-        { baseAngle: -0.55, speed: 0.0030, color: '255,179,0',  alpha: 0.15, width: 2.0 },
-        { baseAngle: -0.28, speed: 0.0040, color: '255,107,53', alpha: 0.12, width: 1.5 },
-        { baseAngle: -0.05, speed: 0.0025, color: '255,179,0',  alpha: 0.13, width: 1.5 },
-        { baseAngle:  0.15, speed: 0.0035, color: '255,107,53', alpha: 0.10, width: 1.5 },
-        { baseAngle:  0.38, speed: 0.0045, color: '255,179,0',  alpha: 0.12, width: 2.0 },
-        { baseAngle:  0.62, speed: 0.0028, color: '255,220,80', alpha: 0.08, width: 1.0 },
-      ];
-      var phases = lasers.map(function (_, i) { return i * 1.1; });
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
 
-      var scrollY = 0;
-      window.addEventListener('scroll', function () {
-        scrollY = window.scrollY;
-      }, { passive: true });
+  var scrollY = 0;
+  window.addEventListener('scroll', function () {
+    scrollY = window.scrollY;
+  }, { passive: true });
 
-      // ── Strobe flash system ──
-      var flashes      = [];
-      var flashColors  = ['255,179,0', '255,107,53', '255,245,204'];
-      var FADE_IN      = 180;
-      var FADE_OUT     = 300;
+  var lasers = [
+    { base: -0.55, speed: 0.003,  color: '255,179,0',  alpha: 0.18, width: 2.0 },
+    { base: -0.28, speed: 0.004,  color: '255,107,53', alpha: 0.14, width: 1.5 },
+    { base: -0.05, speed: 0.0025, color: '255,179,0',  alpha: 0.15, width: 1.5 },
+    { base:  0.15, speed: 0.0035, color: '255,107,53', alpha: 0.11, width: 1.5 },
+    { base:  0.38, speed: 0.0045, color: '255,179,0',  alpha: 0.14, width: 2.0 },
+    { base:  0.62, speed: 0.0028, color: '255,220,80', alpha: 0.09, width: 1.0 },
+  ];
+  var phases = lasers.map(function (_, i) { return i * 1.1; });
 
-      function triggerFlash() {
-        var sw    = strobeCanvas.offsetWidth;
-        var sh    = strobeCanvas.offsetHeight;
-        var count = Math.random() < 0.4 ? 2 : 1;
-        for (var i = 0; i < count; i++) {
-          flashes.push({
-            x:      Math.random() * sw,
-            y:      Math.random() * sh * 0.8,
-            radius: 80 + Math.random() * 60,
-            color:  flashColors[Math.floor(Math.random() * flashColors.length)],
-            alpha:  0.12 + Math.random() * 0.06,
-            start:  performance.now(),
-          });
-        }
-      }
+  function draw() {
+    var w = canvas.width;
+    var h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
 
-      function scheduleFlash() {
-        var screenshotsEl = document.getElementById('screenshots');
-        var threshold = screenshotsEl ? screenshotsEl.offsetTop : heroEl.offsetHeight * 3;
-        if (scrollY < threshold) triggerFlash();
-        setTimeout(scheduleFlash, 2500 + Math.random() * 1500);
-      }
-      setTimeout(scheduleFlash, 2500 + Math.random() * 1500);
+    var heroH = heroEl.offsetHeight;
+    var scrollT = Math.min(scrollY / heroH, 1);
 
-      function drawStrobe(now) {
-        var sw = strobeCanvas.width;
-        var sh = strobeCanvas.height;
-        strobeCtx.clearRect(0, 0, sw, sh);
+    if (scrollY > heroH + 100) {
+      canvas.style.opacity = '0';
+      requestAnimationFrame(draw);
+      return;
+    }
 
-        flashes = flashes.filter(function (f) {
-          var elapsed = now - f.start;
-          var total   = FADE_IN + FADE_OUT;
-          if (elapsed >= total) return false;
+    var fade = scrollT < 0.8 ? 1 : 1 - ((scrollT - 0.8) / 0.2);
+    canvas.style.opacity = fade;
+    if (heroContent) {
+      heroContent.style.opacity = fade;
+      heroContent.style.transform = 'translateY(' + (-scrollY * 0.3) + 'px)';
+    }
 
-          var alpha = elapsed < FADE_IN
-            ? (elapsed / FADE_IN) * f.alpha
-            : (1 - (elapsed - FADE_IN) / FADE_OUT) * f.alpha;
+    var ox = w * 0.5;
+    var oy = 0;
 
-          var grad = strobeCtx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.radius);
-          grad.addColorStop(0, 'rgba(' + f.color + ',' + alpha + ')');
-          grad.addColorStop(1, 'rgba(' + f.color + ',0)');
-          strobeCtx.beginPath();
-          strobeCtx.arc(f.x, f.y, f.radius, 0, Math.PI * 2);
-          strobeCtx.fillStyle = grad;
-          strobeCtx.fill();
-          return true;
-        });
-      }
+    lasers.forEach(function (l, i) {
+      phases[i] += l.speed;
+      var osc = Math.sin(phases[i]) * 0.18;
+      var fan = (i - 2.5) * scrollT * 0.55;
+      var sweep = scrollT * 0.8;
+      var angle = l.base + osc + fan + sweep;
+      var len = Math.sqrt(w * w + h * h) * 1.5;
+      var ex = ox + Math.sin(angle) * len;
+      var ey = oy + Math.cos(angle) * len;
 
-      var t = 0;
+      var grad = ctx.createLinearGradient(ox, oy, ex, ey);
+      grad.addColorStop(0,    'rgba(' + l.color + ',' + l.alpha + ')');
+      grad.addColorStop(0.45, 'rgba(' + l.color + ',' + (l.alpha * 0.35) + ')');
+      grad.addColorStop(1,    'rgba(' + l.color + ',0)');
 
-      function draw() {
-        var now = performance.now();
-        var w   = canvas.width;
-        var h   = canvas.height;
-        ctx.clearRect(0, 0, w, h);
+      ctx.beginPath();
+      ctx.moveTo(ox, oy);
+      ctx.lineTo(ex, ey);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = l.width;
+      ctx.stroke();
+    });
 
-        // origin: top-center, fixed like a nightclub ceiling rig
-        var ox = canvas.width * 0.5;
-        var oy = 0;
-
-        // hide canvas once past the hero
-        var heroBottom = heroEl.offsetTop + heroEl.offsetHeight;
-        var pastHero = window.scrollY > heroBottom;
-        canvas.style.display = pastHero ? 'none' : 'block';
-
-        // scroll progress across full hero height
-        var scrollT = Math.min(window.scrollY / heroEl.offsetHeight, 1);
-
-        lasers.forEach(function (l, i) {
-          phases[i] += l.speed;
-          var osc = Math.sin(phases[i]) * 0.18;
-
-          // fan beams outward from center as user scrolls
-          var scrollShift = (i - 2.5) * scrollT * 0.35;
-          var sweepAngle  = scrollT * 0.5;
-          var angle = l.baseAngle + osc + scrollShift + sweepAngle;
-
-          var len = Math.sqrt(w * w + h * h) * 1.4;
-          var ex  = ox + Math.sin(angle) * len;
-          var ey  = oy + Math.cos(angle) * len;
-
-          var grad = ctx.createLinearGradient(ox, oy, ex, ey);
-          grad.addColorStop(0,    'rgba(' + l.color + ',' + l.alpha + ')');
-          grad.addColorStop(0.45, 'rgba(' + l.color + ',' + (l.alpha * 0.35) + ')');
-          grad.addColorStop(1,    'rgba(' + l.color + ',0)');
-
-          ctx.beginPath();
-          ctx.moveTo(ox, oy);
-          ctx.lineTo(ex, ey);
-          ctx.strokeStyle = grad;
-          ctx.lineWidth   = l.width;
-          ctx.stroke();
-        });
-
-        // draw strobe bursts
-        drawStrobe(now);
-
-        // fade both canvases + hero content together (hold full opacity until 80% through)
-        var fadeOpacity = scrollT < 0.8 ? 1 : 1 - ((scrollT - 0.8) / 0.2);
-        canvas.style.opacity       = Math.max(0, fadeOpacity);
-        strobeCanvas.style.opacity = Math.max(0, fadeOpacity);
-        content.style.opacity      = Math.max(0, fadeOpacity);
-
-        // shift ambient glows slightly on scroll
-        var glowA = document.getElementById('hero-glow-a');
-        var glowB = document.getElementById('hero-glow-b');
-        if (glowA) glowA.style.transform = 'translateX(-50%) translateY(' + (scrollY * 0.08) + 'px)';
-        if (glowB) glowB.style.transform = 'translateY(' + (scrollY * 0.05) + 'px)';
-
-        t += 0.016;
-        requestAnimationFrame(draw);
-      }
-
-      draw();
-    })();
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
   </script>
 
 </body>
