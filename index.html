@@ -231,14 +231,16 @@
     ═══════════════════════════════════════ */
     #hero {
       min-height: 180vh;
-      display: flex; align-items: center; justify-content: center;
       overflow: hidden;
       text-align: center;
       position: relative;
       background: #0D0D0D;
     }
     .hero-content {
-      position: relative; z-index: 1;
+      position: sticky;
+      top: 50vh;
+      transform: translateY(-50%);
+      z-index: 1;
       display: flex; flex-direction: column; align-items: center;
       padding: 0 20px; width: 100%;
     }
@@ -758,7 +760,7 @@
 
   <!-- ── HERO ── -->
   <section id="hero">
-    <canvas id="laserCanvas"  style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+    <canvas id="laserCanvas"  style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
   <canvas id="strobeCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0;"></canvas>
     <div class="hero-ambient" id="hero-glow-a"></div>
     <div class="hero-ambient" id="hero-glow-b"></div>
@@ -1227,12 +1229,13 @@
         var ox = w * 0.5;
         var oy = Math.min(window.scrollY * 0.4, canvas.height * 0.5);
 
-        // scroll progress — stays reactive through the screenshots section
-        var screenshotsEl = document.getElementById('screenshots');
-        var scrollEnd = screenshotsEl
-          ? screenshotsEl.offsetTop + screenshotsEl.offsetHeight
-          : heroEl.offsetHeight * 3;
-        var scrollT = Math.min(window.scrollY / (window.innerHeight * 2.5), 1);
+        // hide canvas once past the hero
+        var heroBottom = heroEl.offsetTop + heroEl.offsetHeight;
+        var pastHero = window.scrollY > heroBottom;
+        canvas.style.display = pastHero ? 'none' : 'block';
+
+        // scroll progress across full hero height
+        var scrollT = Math.min(window.scrollY / heroEl.offsetHeight, 1);
 
         lasers.forEach(function (l, i) {
           phases[i] += l.speed;
@@ -1263,8 +1266,8 @@
         // draw strobe bursts
         drawStrobe(now);
 
-        // fade both canvases + hero content together (hold full opacity until 60% through)
-        var fadeOpacity = scrollT < 0.6 ? 1 : 1 - ((scrollT - 0.6) / 0.4);
+        // fade both canvases + hero content together (hold full opacity until 80% through)
+        var fadeOpacity = scrollT < 0.8 ? 1 : 1 - ((scrollT - 0.8) / 0.2);
         canvas.style.opacity       = Math.max(0, fadeOpacity);
         strobeCanvas.style.opacity = Math.max(0, fadeOpacity);
         content.style.opacity      = Math.max(0, fadeOpacity);
