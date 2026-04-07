@@ -752,6 +752,7 @@
         <span>HappyMaps</span>
       </a>
       <ul class="nav-links">
+        <li><a href="#how-it-works">How it works</a></li>
         <li><a href="#screenshots">Screenshots</a></li>
         <li><a href="#download" class="btn-nav">Download</a></li>
       </ul>
@@ -776,6 +777,9 @@
       <div class="hero-ctas">
         <a href="#download" class="btn-primary">
           <img src="assets/images/HappyMapsAppIcon.png" style="width:22px;height:22px;border-radius:5px;flex-shrink:0;" alt="" /> Download on iOS
+        </a>
+        <a href="#how-it-works" class="btn btn-ghost">
+          See how it works
         </a>
       </div>
     </div>
@@ -1225,9 +1229,9 @@
         var h   = canvas.height;
         ctx.clearRect(0, 0, w, h);
 
-        // origin: top-center with parallax
-        var ox = w * 0.5;
-        var oy = Math.min(window.scrollY * 0.4, canvas.height * 0.5);
+        // origin: top-center, fixed like a nightclub ceiling rig
+        var ox = canvas.width * 0.5;
+        var oy = 0;
 
         // hide canvas once past the hero
         var heroBottom = heroEl.offsetTop + heroEl.offsetHeight;
