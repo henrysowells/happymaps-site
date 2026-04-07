@@ -230,7 +230,7 @@
        HERO — single column, centered, mobile-first
     ═══════════════════════════════════════ */
     #hero {
-      min-height: 100vh;
+      min-height: 180vh;
       display: flex; align-items: center; justify-content: center;
       overflow: hidden;
       text-align: center;
@@ -1326,14 +1326,14 @@
 
         // origin: top-center with parallax
         var ox = w * 0.5;
-        var oy = scrollY * 0.25;
+        var oy = Math.min(scrollY * 0.5, canvas.height * 0.6);
 
         // scroll progress — stays reactive through the screenshots section
         var screenshotsEl = document.getElementById('screenshots');
         var scrollEnd = screenshotsEl
           ? screenshotsEl.offsetTop + screenshotsEl.offsetHeight
           : heroEl.offsetHeight * 3;
-        var scrollT = Math.min(scrollY / (scrollEnd * 0.7), 1);
+        var scrollT = Math.min(scrollY / (window.innerHeight * 2.5), 1);
 
         lasers.forEach(function (l, i) {
           phases[i] += l.speed;
@@ -1341,8 +1341,9 @@
           var angle = l.baseAngle + osc;
 
           // fan beams outward from center as user scrolls
-          var scrollShift = (i - 2.5) * scrollT * 0.18;
-          var displayAngle = angle + scrollShift;
+          var scrollShift = (i - 2.5) * scrollT * 0.35;
+          var sweepAngle  = scrollT * 0.6;
+          var displayAngle = angle + scrollShift + sweepAngle;
 
           var len = Math.sqrt(w * w + h * h) * 1.4;
           var ex  = ox + Math.sin(displayAngle) * len;
