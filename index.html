@@ -1194,7 +1194,7 @@
     var oy = 0;
 
     lasers.forEach(function (l, i) {
-      var boost = Math.abs(scrollVel) * 0.004;
+      var boost = Math.abs(scrollVel) * 0.02;
       phases[i]  += l.speed  + boost;
       phases2[i] += l.speed2 + boost * 1.5;
       var osc = Math.sin(phases[i]) * 0.32 + Math.sin(phases2[i]) * 0.18;
