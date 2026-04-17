@@ -1152,7 +1152,6 @@
   var scrollVel = 0;
   var rawScrollVel = 0;
   var lastScrollY = 0;
-  var colorMix = 0;
   window.addEventListener('scroll', function () {
     rawScrollVel = window.scrollY - lastScrollY;
     lastScrollY = window.scrollY;
@@ -1160,12 +1159,12 @@
   }, { passive: true });
 
   var lasers = [
-    { base: -0.55, speed: 0.018,  speed2: 0.041, color: '255,179,0',  restColor: '255,184,0', alpha: 0.18, width: 2.0 },
-    { base: -0.28, speed: 0.024,  speed2: 0.057, color: '255,107,53', restColor: '255,184,0', alpha: 0.14, width: 1.5 },
-    { base: -0.05, speed: 0.014,  speed2: 0.035, color: '255,179,0',  restColor: '255,184,0', alpha: 0.15, width: 1.5 },
-    { base:  0.15, speed: 0.021,  speed2: 0.049, color: '255,107,53', restColor: '255,184,0', alpha: 0.11, width: 1.5 },
-    { base:  0.38, speed: 0.028,  speed2: 0.063, color: '255,179,0',  restColor: '255,184,0', alpha: 0.14, width: 2.0 },
-    { base:  0.62, speed: 0.016,  speed2: 0.038, color: '255,220,80', restColor: '255,184,0', alpha: 0.09, width: 1.0 },
+    { base: -0.55, speed: 0.018,  speed2: 0.041, color: '255,179,0',  alpha: 0.18, width: 2.0 },
+    { base: -0.28, speed: 0.024,  speed2: 0.057, color: '255,107,53', alpha: 0.14, width: 1.5 },
+    { base: -0.05, speed: 0.014,  speed2: 0.035, color: '255,179,0',  alpha: 0.15, width: 1.5 },
+    { base:  0.15, speed: 0.021,  speed2: 0.049, color: '255,107,53', alpha: 0.11, width: 1.5 },
+    { base:  0.38, speed: 0.028,  speed2: 0.063, color: '255,179,0',  alpha: 0.14, width: 2.0 },
+    { base:  0.62, speed: 0.016,  speed2: 0.038, color: '255,220,80', alpha: 0.09, width: 1.0 },
   ];
   var phases  = lasers.map(function (_, i) { return i * 1.1; });
   var phases2 = lasers.map(function (_, i) { return i * 2.7; });
@@ -1194,8 +1193,6 @@
 
     lasers.forEach(function (l, i) {
       scrollVel += (rawScrollVel - scrollVel) * 0.12;
-      var isMoving = Math.abs(scrollVel) > 0.5;
-      colorMix += (isMoving ? 1 : 0 - colorMix) * 0.06;
       var boost = Math.abs(scrollVel) * 0.006;
       phases[i]  += l.speed  + boost;
       phases2[i] += l.speed2 + boost * 1.5;
@@ -1207,18 +1204,10 @@
       var ex = ox + Math.sin(angle) * len;
       var ey = oy + Math.cos(angle) * len;
 
-      function lerpChannel(a, b, t) {
-        var ac = a.split(',').map(Number);
-        var bc = b.split(',').map(Number);
-        return Math.round(ac[0]+(bc[0]-ac[0])*t)+','
-              +Math.round(ac[1]+(bc[1]-ac[1])*t)+','
-              +Math.round(ac[2]+(bc[2]-ac[2])*t);
-      }
-      var blended = lerpChannel(l.restColor, l.color, colorMix);
       var grad = ctx.createLinearGradient(ox, oy, ex, ey);
-      grad.addColorStop(0,    'rgba(' + blended + ',' + l.alpha + ')');
-      grad.addColorStop(0.45, 'rgba(' + blended + ',' + (l.alpha * 0.35) + ')');
-      grad.addColorStop(1,    'rgba(' + blended + ',0)');
+      grad.addColorStop(0,    'rgba(' + l.color + ',' + l.alpha + ')');
+      grad.addColorStop(0.45, 'rgba(' + l.color + ',' + (l.alpha * 0.35) + ')');
+      grad.addColorStop(1,    'rgba(' + l.color + ',0)');
 
       ctx.beginPath();
       ctx.moveTo(ox, oy);
