@@ -1150,9 +1150,10 @@
 
   var scrollY = 0;
   var scrollVel = 0;
+  var rawScrollVel = 0;
   var lastScrollY = 0;
   window.addEventListener('scroll', function () {
-    scrollVel = window.scrollY - lastScrollY;
+    rawScrollVel = window.scrollY - lastScrollY;
     lastScrollY = window.scrollY;
     scrollY = window.scrollY;
   }, { passive: true });
@@ -1191,6 +1192,7 @@
     var oy = 0;
 
     lasers.forEach(function (l, i) {
+      scrollVel += (rawScrollVel - scrollVel) * 0.12;
       var boost = Math.abs(scrollVel) * 0.006;
       phases[i]  += l.speed  + boost;
       phases2[i] += l.speed2 + boost * 1.5;
