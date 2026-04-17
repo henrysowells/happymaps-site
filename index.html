@@ -230,7 +230,7 @@
        HERO — single column, centered, mobile-first
     ═══════════════════════════════════════ */
     #hero {
-      min-height: 120vh;
+      min-height: 180vh;
       overflow: hidden;
       text-align: center;
       position: relative;
@@ -1174,7 +1174,7 @@
     ctx.clearRect(0, 0, w, h);
 
     var heroH = heroEl.offsetHeight;
-    var scrollT = Math.min(scrollY / heroH, 1);
+    var scrollT = Math.min(scrollY / (window.innerHeight * 2.5), 1);
 
     if (scrollY > heroH + 100) {
       canvas.style.opacity = '0';
@@ -1195,7 +1195,7 @@
       phases[i]  += l.speed  + boost;
       phases2[i] += l.speed2 + boost * 1.5;
       var osc = Math.sin(phases[i]) * 0.32 + Math.sin(phases2[i]) * 0.18;
-      var fan = (i - 2.5) * scrollT * 0.55;
+      var fan = (i - 2.5) * scrollT * 0.75;
       var sweep = scrollT * 0.8;
       var angle = l.base + osc + fan + sweep;
       var len = Math.sqrt(w * w + h * h) * 1.5;
