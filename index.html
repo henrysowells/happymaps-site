@@ -37,9 +37,9 @@
        TOKENS
     ───────────────────────────────────────── */
     :root {
-      --amber:        #FFB800;
-      --amber-glow:   rgba(255,184,0,0.15);
-      --amber-strong: rgba(255,184,0,0.35);
+      --amber:        #FFB300;
+      --amber-glow:   rgba(255,179,0,0.15);
+      --amber-strong: rgba(255,179,0,0.35);
       --bg:      #080808;
       --surface: #111111;
       --border:  rgba(255,255,255,0.07);
@@ -85,9 +85,9 @@
       background: linear-gradient(
         90deg,
         #b87800 0%,
-        #FFB800 30%,
+        #FFB300 30%,
         #ffe680 50%,
-        #FFB800 70%,
+        #FFB300 70%,
         #b87800 100%
       );
       background-size: 200% auto;
@@ -167,7 +167,7 @@
       transition: background 0.2s, transform 0.15s;
       box-shadow: 0 0 40px var(--amber-strong);
     }
-    .btn-primary:hover { background: #ffc533; transform: translateY(-2px); }
+    .btn-primary:hover { background: #ffc133; transform: translateY(-2px); }
 
     .btn-secondary {
       display: inline-flex; align-items: center; gap: 8px;
@@ -224,7 +224,7 @@
       font-weight: 600; font-size: 14px;
       transition: background 0.2s;
     }
-    .btn-nav:hover { background: #ffc533 !important; }
+    .btn-nav:hover { background: #ffc133 !important; }
 
     /* ═══════════════════════════════════════
        HERO — single column, centered, mobile-first
@@ -286,7 +286,7 @@
     .hero-eyebrow {
       display: inline-flex; align-items: center; gap: 8px;
       background: var(--amber-glow);
-      border: 1px solid rgba(255,184,0,0.3);
+      border: 1px solid rgba(255,179,0,0.3);
       padding: 6px 14px; border-radius: 100px;
       margin-bottom: 18px;
     }
@@ -630,7 +630,7 @@
       .download-content h2 { font-size: 68px; }
 
       /* hover interactions */
-      .step-card:hover { border-color: rgba(255,184,0,0.3); transform: translateY(-4px); transition: border-color 0.3s, transform 0.3s; }
+      .step-card:hover { border-color: rgba(255,179,0,0.3); transform: translateY(-4px); transition: border-color 0.3s, transform 0.3s; }
     }
 
     /* ═══════════════════════════════════════
@@ -665,7 +665,7 @@
 
     /* Border brightens when spotlight is active */
     .step-card.glow-active {
-      border-color: rgba(255, 184, 0, 0.28) !important;
+      border-color: rgba(255, 179, 0, 0.28) !important;
     }
     /* ═══════════════════════════════════════
        HERO PHONE SCREEN CYCLING
@@ -738,7 +738,7 @@
       transition: background 0.15s, color 0.15s;
       font-family: 'DM Sans', sans-serif;
     }
-    .city-option:hover { background: rgba(255,184,0,0.08); color: var(--text); }
+    .city-option:hover { background: rgba(255,179,0,0.08); color: var(--text); }
     .city-option.selected { color: var(--amber); }
 
   </style>
