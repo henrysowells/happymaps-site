@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appID": "RV89K6WMHY.com.happymaps.app",
+        "paths": [
+          "/c/*",
+          "/g/*",
+          "/b/*",
+          "/u/*"
+        ]
+      }
+    ]
+  }
+}
