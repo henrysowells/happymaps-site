@@ -695,7 +695,7 @@
 
       let result;
       try {
-        if (type === 'c') result = await client.rpc('get_crawl_preview', { crawl_id: id });
+        if (type === 'c') result = await client.rpc('get_crawl_preview', { p_crawl_id: id });
         if (type === 'g') result = await client.rpc('get_group_preview', { group_id: id });
         if (type === 'b') result = await client.rpc('get_bar_preview',   { bar_id:   id });
         if (type === 'u') result = await client.rpc('get_user_preview',  { p_username: id });
