@@ -255,7 +255,7 @@
        HERO — single column, centered, mobile-first
     ═══════════════════════════════════════ */
     #hero {
-      min-height: 180vh;
+      min-height: 80vh;
       overflow: hidden;
       text-align: center;
       position: relative;
@@ -581,7 +581,7 @@
       .container { max-width: 740px; padding: 0 24px; }
 
       .section-header { margin-bottom: 52px; }
-      .section-header h2 { font-size: 38px; }
+      .section-header h2 { font-size: 36px; }
 
       /* nav */
       .nav-links { display: flex; }
@@ -614,7 +614,7 @@
     @media (min-width: 1024px) {
       .container { max-width: 1160px; padding: 0 24px; }
 
-      .section-header h2 { font-size: 52px; }
+      .section-header h2 { font-size: 44px; }
       .section-header { margin-bottom: 64px; }
 
       /* ── hero: full-screen centered ── */
@@ -814,7 +814,7 @@
       <div class="section-header reveal">
         <span class="label">App screenshots</span>
         <div class="divider"></div>
-        <h2>A look inside HappyMaps</h2>
+        <h2>Built for going out.</h2>
         <p>Every screen designed for the energy of a night out.</p>
       </div>
     </div>
@@ -1197,7 +1197,7 @@
     ctx.clearRect(0, 0, w, h);
 
     var heroH = heroEl.offsetHeight;
-    var scrollT = Math.min(scrollY / (window.innerHeight * 2.5), 1);
+    var scrollT = Math.min(scrollY / (window.innerHeight * 1.35), 1);
 
     if (scrollY > heroH + 100) {
       canvas.style.opacity = '0';
