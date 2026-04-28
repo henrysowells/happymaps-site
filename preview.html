@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <!--
-  404.html — HappyMaps web preview + SPA router
-  ─────────────────────────────────────────────
-  GitHub Pages serves this file for any unmatched path, making it our
-  client-side router. It parses window.location.pathname and renders a
-  preview card for /c/:id (crawl), /g/:id (group), /b/:id (bar), and
-  /u/:username (user). Truly unknown paths get a friendly 404 message.
+  preview.html — HappyMaps web preview + SPA router
+  ─────────────────────────────────────────────────
+  Served by Vercel's rewrite rules for Universal Link paths
+  (/b/, /u/, /g/, /c/). Parses window.location.pathname to render
+  a preview card for /c/:id (crawl), /g/:id (group), /b/:id (bar),
+  /u/:username (user) using the Supabase anon key. Truly unknown
+  paths fall through to Vercel's default 404 page.
 
   All content is fetched CSR-only from Supabase using the anon key
   (public by design — anon keys are safe to embed per Supabase docs).

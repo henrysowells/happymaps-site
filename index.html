@@ -274,17 +274,16 @@
        HERO — single column, centered, mobile-first
     ═══════════════════════════════════════ */
     #hero {
-      min-height: 100vh;
+      min-height: 150vh;
       overflow: hidden;
       text-align: center;
       position: relative;
       background: #0D0D0D;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
     }
     .hero-content {
       position: relative;
       z-index: 2;
+      height: 100vh;
       display: flex; flex-direction: column; align-items: center;
       justify-content: center;
       padding: 0 20px; width: 100%;
@@ -440,6 +439,7 @@
     }
 
     @media (max-width: 767px) {
+      #hero { min-height: 110vh; }
       .sc-frame-wrap { width: 85vw; }
       .sc-frame-wrap .phone-frame { width: 85vw; height: auto; border-radius: 30px; }
     }
@@ -844,8 +844,8 @@
       <div class="section-header reveal">
         <span class="label">App screenshots</span>
         <div class="divider"></div>
-        <h2>Built for going out.</h2>
-        <p>Every screen designed for the energy of a night out.</p>
+        <h2>See your friends' plans without 30 group-chat messages.</h2>
+        <p>Tap "I'm Going" on a bar. Watch friends pile in. Skip the night that fizzles, find the one that's lit.</p>
       </div>
     </div>
     <div class="sc-showcase">
@@ -873,10 +873,10 @@
       <div class="download-content">
         <span class="label reveal">Get the app</span>
         <h2 class="reveal d1">
-          Tonight just got a <span class="accent">map.</span>
+          Real-time coordination for college nights out.
         </h2>
         <p>
-          HappyMaps shows you where your friends are going out, what bars are filling up, and how to plan a night without 30 group-chat messages. Live in LA and DC — more cities coming.
+          Live bar crowds. Group voting. Bar crawl planning. Built for UCLA, USC, LMU, Pepperdine, Georgetown, GW, and American — with more schools coming.
         </p>
         <div class="download-btns">
           <a href="/coming-soon" target="_blank" rel="noopener" class="app-store-badge app-store-badge--download" aria-label="Download HappyMaps on the App Store">
@@ -1190,10 +1190,14 @@
   var scrollVel = 0;
   var rawScrollVel = 0;
   var lastScrollY = 0;
+  var targetScrollT = 0;
+  var smoothScrollT = 0;
+  var lerpFactor = 0.1;
   window.addEventListener('scroll', function () {
     rawScrollVel = window.scrollY - lastScrollY;
     lastScrollY = window.scrollY;
     scrollY = window.scrollY;
+    targetScrollT = Math.min(scrollY / (window.innerHeight * 2.0), 1);
   }, { passive: true });
 
   var lasers = [
@@ -1213,7 +1217,11 @@
     ctx.clearRect(0, 0, w, h);
 
     var heroH = heroEl.offsetHeight;
-    var scrollT = Math.min(scrollY / (window.innerHeight * 1.35), 1);
+    smoothScrollT += (targetScrollT - smoothScrollT) * lerpFactor;
+    if (Math.abs(targetScrollT - smoothScrollT) < 0.0001) {
+      smoothScrollT = targetScrollT;
+    }
+    var scrollT = smoothScrollT;
 
     if (scrollY > heroH + 100) {
       canvas.style.opacity = '0';
@@ -1235,7 +1243,7 @@
       phases[i]  += l.speed  + boost;
       phases2[i] += l.speed2 + boost * 1.5;
       var osc = Math.sin(phases[i]) * 0.32 + Math.sin(phases2[i]) * 0.18;
-      var fan = (i - 2.5) * scrollT * 0.75;
+      var fan = (i - 2.5) * scrollT * 0.35;
       var sweep = scrollT * 0.8;
       var angle = l.base + osc + fan + sweep;
       var len = Math.sqrt(w * w + h * h) * 1.5;
