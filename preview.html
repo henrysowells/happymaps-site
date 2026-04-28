@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<!--
+  404.html — HappyMaps web preview + SPA router
+  ─────────────────────────────────────────────
+  GitHub Pages serves this file for any unmatched path, making it our
+  client-side router. It parses window.location.pathname and renders a
+  preview card for /c/:id (crawl), /g/:id (group), /b/:id (bar), and
+  /u/:username (user). Truly unknown paths get a friendly 404 message.
+
+  All content is fetched CSR-only from Supabase using the anon key
+  (public by design — anon keys are safe to embed per Supabase docs).
+  Visibility gating is enforced in SECURITY DEFINER RPCs on the server;
+  this page never sees friends-only full data.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HappyMaps</title>
+  <meta name="robots" content="noindex" />
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="HappyMaps" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#FFB300" />
+
+  <!-- Open Graph / iMessage / Slack -->
+  <meta property="og:title" content="HappyMaps">
+  <meta property="og:description" content="See where your friends are going tonight. Coming soon to UCLA.">
+  <meta property="og:image" content="https://happymapsapp.com/assets/images/og-image.png">
+  <meta property="og:url" content="https://happymapsapp.com">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="HappyMaps">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="HappyMaps">
+  <meta name="twitter:description" content="See where your friends are going tonight. Coming soon to UCLA.">
+  <meta name="twitter:image" content="https://happymapsapp.com/assets/images/og-image.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet" />
+  <style>
+    @font-face {
+      font-family: 'Beon';
+      src: url('/assets/fonts/Beon.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    /* ── RESET ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; min-width: 0; }
+    html, body { overflow-x: hidden; max-width: 100vw; }
+    img { max-width: 100%; display: block; }
+
+    /* ── TOKENS (exact match with index.html) ── */
+    :root {
+      --amber:        #FFB300;
+      --amber-glow:   rgba(255,179,0,0.15);
+      --amber-strong: rgba(255,179,0,0.35);
+      --bg:      #080808;
+      --surface: #111111;
+      --border:  rgba(255,255,255,0.07);
+      --text:    #F5F5F5;
+      --text-2:  #999999;
+      --text-3:  #555555;
+      --r-lg: 20px;
+    }
+
+    /* ── BASE ── */
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* noise grain overlay — identical to landing page */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.022; pointer-events: none; z-index: 9999;
+    }
+
+    /* ── LAYOUT ── */
+    .container { width: 100%; padding: 0 20px; margin: 0 auto; }
+    .preview-outer {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 100px 20px 60px;
+    }
+
+    /* ── TYPOGRAPHY HELPERS (from index.html) ── */
+    .label {
+      display: inline-block;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--amber);
+    }
+    .accent { color: var(--amber); }
+    .divider {
+      width: 44px; height: 3px;
+      background: var(--amber); border-radius: 2px;
+      margin: 10px 0 18px;
+    }
+
+    /* ── NAV (from index.html) ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100; padding: 16px 0;
+      transition: background 0.3s, backdrop-filter 0.3s;
+      background: rgba(8,8,8,0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo {
+      display: flex; align-items: center; gap: 8px;
+      text-decoration: none;
+      font-weight: 800; font-size: 20px; color: var(--text);
+    }
+    .nav-logo img { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; }
+
+    /* ── BUTTONS (from index.html) ── */
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--amber); color: #000;
+      padding: 14px 24px; border-radius: 100px;
+      font-weight: 700; font-size: 15px; text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 0 40px var(--amber-strong);
+      border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-primary:hover { background: #ffc133; transform: translateY(-2px); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; color: var(--text);
+      padding: 14px 24px; border-radius: 100px;
+      font-weight: 600; font-size: 15px; text-decoration: none;
+      border: 1px solid var(--border);
+      transition: border-color 0.2s, background 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.04); }
+
+    /* ── FOOTER (from index.html) ── */
+    footer { padding: 36px 0; border-top: 1px solid rgba(255,184,0,0.22); margin-top: auto; }
+    .footer-inner { display: flex; flex-direction: column; gap: 18px; }
+    .footer-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 800; font-size: 18px; color: var(--text); }
+    .footer-logo img { width: 28px; height: 28px; border-radius: 7px; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 14px 18px; list-style: none; }
+    .footer-links a { font-size: 13px; color: var(--text-3); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text-2); }
+    .footer-copy { font-size: 12px; color: var(--text-3); }
+    @media (min-width: 768px) {
+      .footer-inner { flex-direction: row; align-items: center; justify-content: space-between; }
+    }
+
+    /* ── LOADING ── */
+    .loading-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+      padding: 60px 0;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(255,179,0,0.18);
+      border-top-color: var(--amber);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 14px; color: var(--text-3); }
+
+    /* ── PREVIEW CARD ── */
+    .preview-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      width: 100%; max-width: 480px;
+      overflow: hidden;
+    }
+
+    /* color accent bar — shown when data.color is present */
+    .card-accent { height: 4px; width: 100%; }
+
+    .card-body { padding: 28px 24px 24px; }
+
+    /* type badge row */
+    .badge-row {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px;
+    }
+    .type-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--amber);
+    }
+    .school-badge {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      background: var(--amber-glow);
+      border: 1px solid rgba(255,179,0,0.25);
+      color: var(--amber);
+      padding: 2px 8px; border-radius: 100px;
+    }
+    .private-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    /* title */
+    .preview-title {
+      font-size: 24px; font-weight: 800;
+      letter-spacing: -0.03em; line-height: 1.15;
+      margin-bottom: 4px;
+    }
+    .preview-title.muted { color: var(--text-3); }
+
+    /* organizer row */
+    .organizer-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 14px;
+    }
+    .avatar-sm {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--amber); color: #000;
+      font-size: 11px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; overflow: hidden;
+    }
+    .avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+    .organizer-name { font-size: 13px; color: var(--text-2); }
+    .organizer-name strong { color: var(--text); font-weight: 600; }
+
+    /* date */
+    .preview-date {
+      font-size: 13px; color: var(--text-2);
+      margin-top: 6px;
+    }
+
+    /* card divider */
+    .card-rule {
+      height: 1px; background: var(--border);
+      margin: 20px 0;
+    }
+
+    /* stops list */
+    .stops-heading {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-3);
+      margin-bottom: 12px;
+    }
+    .stops-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .stop-item {
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .stop-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--amber-glow);
+      border: 1px solid rgba(255,179,0,0.2);
+      color: var(--amber);
+      font-size: 10px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .stop-info { flex: 1; }
+    .stop-name { font-size: 14px; font-weight: 600; line-height: 1.3; }
+    .stop-sub { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+    .stop-time { font-size: 12px; color: var(--amber); font-weight: 600; margin-top: 1px; }
+
+    /* member count */
+    .member-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--amber-glow);
+      border: 1px solid rgba(255,179,0,0.2);
+      border-radius: 100px;
+      padding: 5px 12px;
+      font-size: 13px; font-weight: 700; color: var(--amber);
+      margin-top: 20px;
+    }
+    .member-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--amber);
+    }
+
+    /* private message */
+    .private-msg {
+      font-size: 15px; color: var(--text-2);
+      line-height: 1.6; margin-top: 10px;
+    }
+
+    /* user card specific */
+    .user-card { text-align: center; }
+    .avatar-lg {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--amber); color: #000;
+      font-size: 26px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px; flex-shrink: 0; overflow: hidden;
+    }
+    .avatar-lg img { width: 100%; height: 100%; object-fit: cover; }
+    .user-handle { font-size: 14px; color: var(--text-3); margin-top: 2px; }
+    .user-school {
+      display: inline-block;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--amber);
+      background: var(--amber-glow);
+      border: 1px solid rgba(255,179,0,0.2);
+      padding: 3px 10px; border-radius: 100px;
+      margin-top: 10px;
+    }
+
+    /* bar card */
+    .bar-neighborhood {
+      font-size: 15px; color: var(--text-2);
+      margin-top: 6px;
+    }
+    .bar-address {
+      font-size: 13px; color: var(--text-3);
+      margin-top: 4px;
+    }
+    .bar-type-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-3);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      padding: 3px 10px; border-radius: 100px;
+      margin-top: 12px;
+    }
+
+    /* ── COMING SOON STRIP ── */
+    .cs-strip {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border);
+      background: rgba(255,179,0,0.025);
+      text-align: center;
+    }
+    .cs-strip .label { display: block; margin-bottom: 6px; }
+    .cs-strip p {
+      font-size: 14px; color: var(--text-2); line-height: 1.5;
+    }
+
+    /* ── NOT FOUND / 404 ── */
+    .not-found-wrap {
+      text-align: center;
+      padding: 60px 20px;
+      max-width: 420px;
+    }
+    .not-found-icon {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .not-found-title {
+      font-size: 22px; font-weight: 800;
+      letter-spacing: -0.02em; margin-bottom: 8px;
+    }
+    .not-found-sub {
+      font-size: 15px; color: var(--text-2);
+      line-height: 1.6; margin-bottom: 28px;
+    }
+
+    /* ── LOCK ICON ROW ── */
+    .lock-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 14px;
+    }
+    .lock-icon {
+      width: 20px; height: 20px; color: var(--text-3);
+      flex-shrink: 0;
+    }
+
+    @media (min-width: 768px) {
+      .preview-card { max-width: 520px; }
+      .card-body { padding: 32px 32px 28px; }
+      .cs-strip { padding: 24px 32px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="container nav-inner">
+      <a href="/" class="nav-logo">
+        <img src="/assets/images/HappyMapsAppIcon.png" alt="HappyMaps" />
+        <span>HappyMaps</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- MAIN — populated by JS -->
+  <main>
+    <div class="preview-outer" id="root">
+      <div class="loading-wrap">
+        <div class="spinner"></div>
+        <span class="loading-text">Loading…</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container footer-inner">
+      <a href="/" class="footer-logo">
+        <img src="/assets/images/HappyMapsAppIcon.png" alt="HappyMaps" />
+        <span>HappyMaps</span>
+      </a>
+      <ul class="footer-links">
+        <li><a href="/privacy">Privacy</a></li>
+        <li><a href="/terms">Terms</a></li>
+      </ul>
+      <span class="footer-copy">© 2026 HappyMaps. All rights reserved.</span>
+    </div>
+  </footer>
+
+  <!-- Supabase JS v2 UMD — exposes window.supabase.createClient -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <script>
+    // ─── Config ─────────────────────────────────────────────────────────────
+    const SUPA_URL = 'https://pobbjxrhnqufkhxcornw.supabase.co';
+    const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvYmJqeHJobnF1ZmtoeGNvcm53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDE5NTksImV4cCI6MjA4ODc3Nzk1OX0.2fuEPVX9dzBfnDoHk-Y57sIo7pnYuT879NGRakkZof0';
+
+    // Type labels for UI
+    const TYPE_LABELS = { c: 'Crawl', g: 'Group', b: 'Bar', u: 'Profile' };
+    const TYPE_NOT_FOUND = {
+      c: "This crawl doesn't exist anymore.",
+      g: "This group doesn't exist anymore.",
+      b: "This bar isn't in our database.",
+      u: "This profile doesn't exist.",
+    };
+
+    // ─── Helpers ────────────────────────────────────────────────────────────
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function initials(name) {
+      if (!name) return '?';
+      return name.trim().split(/\s+/).map(w => w[0] || '').join('').toUpperCase().slice(0, 2) || '?';
+    }
+
+    function fmtDate(d) {
+      if (!d) return null;
+      try {
+        return new Date(d + 'T12:00:00').toLocaleDateString('en-US', {
+          weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+        });
+      } catch { return null; }
+    }
+
+    function fmtTime(t) {
+      if (!t) return null;
+      try {
+        const [h, m] = t.split(':').map(Number);
+        const d = new Date(); d.setHours(h, m, 0);
+        return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      } catch { return null; }
+    }
+
+    function fmtBarType(t) {
+      if (!t) return '';
+      return t.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function avatarImgOrInitials(avatarUrl, name, cls) {
+      if (avatarUrl) {
+        return `<div class="${esc(cls)}"><img src="${esc(avatarUrl)}" alt="${esc(name)}" /></div>`;
+      }
+      return `<div class="${esc(cls)}">${esc(initials(name))}</div>`;
+    }
+
+    const COMING_SOON = `
+      <div class="cs-strip">
+        <span class="label">Coming Soon</span>
+        <p>HappyMaps launches at UCLA this fall.</p>
+      </div>`;
+
+    // ─── Renderers ──────────────────────────────────────────────────────────
+    const root = document.getElementById('root');
+
+    function setTitle(t) { document.title = t + ' — HappyMaps'; }
+
+    function render(html) { root.innerHTML = html; }
+
+    function renderLoading() {
+      render(`<div class="loading-wrap">
+        <div class="spinner"></div>
+        <span class="loading-text">Loading…</span>
+      </div>`);
+    }
+
+    function render404() {
+      setTitle('Not Found');
+      render(`<div class="not-found-wrap">
+        <div class="not-found-icon">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color:var(--text-3)">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h1 class="not-found-title">Page not found</h1>
+        <p class="not-found-sub">This page doesn't exist.</p>
+        <a href="/" class="btn-secondary">← Back to HappyMaps</a>
+      </div>`);
+    }
+
+    function renderNotFound(type) {
+      setTitle('Not Found');
+      render(`<div class="not-found-wrap">
+        <div class="not-found-icon">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color:var(--text-3)">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+        </div>
+        <h1 class="not-found-title">Not found</h1>
+        <p class="not-found-sub">${esc(TYPE_NOT_FOUND[type] || "This content doesn't exist anymore.")}</p>
+        <a href="/" class="btn-secondary">← Back to HappyMaps</a>
+      </div>`);
+    }
+
+    function renderError() {
+      setTitle('Error');
+      render(`<div class="not-found-wrap">
+        <div class="not-found-icon">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color:var(--text-3)">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
+        </div>
+        <h1 class="not-found-title">Something went wrong</h1>
+        <p class="not-found-sub">Couldn't load this preview. Please try again.</p>
+        <a href="/" class="btn-secondary">← Back to HappyMaps</a>
+      </div>`);
+    }
+
+    function renderPrivateCrawl(d) {
+      setTitle('Private Crawl');
+      render(`<div class="preview-outer"><div class="preview-card">
+        <div class="card-body">
+          <div class="lock-row">
+            <svg class="lock-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+            <span class="private-badge">Private Crawl</span>
+          </div>
+          <h1 class="preview-title muted">${esc(d.name)}</h1>
+          <p class="private-msg">This is a private crawl. Get the app to join.</p>
+        </div>
+        ${COMING_SOON}
+      </div></div>`);
+    }
+
+    function renderPrivateGroup(d) {
+      setTitle('Private Group');
+      render(`<div class="preview-outer"><div class="preview-card">
+        <div class="card-body">
+          <div class="lock-row">
+            <svg class="lock-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+            <span class="private-badge">Private Group</span>
+          </div>
+          <h1 class="preview-title muted">${esc(d.name)}</h1>
+          <p class="private-msg">This is a private group. Get the app to join.</p>
+        </div>
+        ${COMING_SOON}
+      </div></div>`);
+    }
+
+    function renderCrawl(d) {
+      setTitle(d.name);
+      const accentColor = d.color || 'var(--amber)';
+      const stopsHtml = (d.stops && d.stops.length) ? (() => {
+        const items = d.stops.map((s, i) => {
+          const time = fmtTime(s.arrival_time);
+          return `<li class="stop-item">
+            <span class="stop-num">${i + 1}</span>
+            <div class="stop-info">
+              <div class="stop-name">${esc(s.bar_name)}</div>
+              ${s.neighborhood ? `<div class="stop-sub">${esc(s.neighborhood)}</div>` : ''}
+              ${time ? `<div class="stop-time">${esc(time)}</div>` : ''}
+            </div>
+          </li>`;
+        }).join('');
+        return `<div class="card-rule"></div>
+          <p class="stops-heading">Stops</p>
+          <ol class="stops-list">${items}</ol>`;
+      })() : '';
+
+      const dateHtml = fmtDate(d.date) ? `<p class="preview-date">${esc(fmtDate(d.date))}</p>` : '';
+      const memberHtml = (d.member_count > 0) ?
+        `<div class="member-chip"><span class="member-dot"></span>${esc(String(d.member_count))} going</div>` : '';
+
+      const orgAvatar = d.organizer ? avatarImgOrInitials(d.organizer.avatar_url, d.organizer.display_name, 'avatar-sm') : '';
+      const orgName = d.organizer ? `<span class="organizer-name">by <strong>${esc(d.organizer.display_name)}</strong></span>` : '';
+
+      const schoolBadge = (d.visibility === 'school') ? `<span class="school-badge">School</span>` : '';
+
+      render(`<div class="preview-outer"><div class="preview-card">
+        <div class="card-accent" style="background:${esc(accentColor)}"></div>
+        <div class="card-body">
+          <div class="badge-row">
+            <span class="type-badge">Crawl</span>
+            ${schoolBadge}
+          </div>
+          <h1 class="preview-title">${esc(d.name)}</h1>
+          ${dateHtml}
+          ${orgAvatar || orgName ? `<div class="organizer-row">${orgAvatar}${orgName}</div>` : ''}
+          ${stopsHtml}
+          ${memberHtml}
+        </div>
+        ${COMING_SOON}
+      </div></div>`);
+    }
+
+    function renderGroup(d) {
+      setTitle(d.name);
+      const accentColor = d.color || 'var(--amber)';
+      const memberHtml = (d.member_count > 0) ?
+        `<div class="member-chip"><span class="member-dot"></span>${esc(String(d.member_count))} members</div>` : '';
+
+      const orgAvatar = d.organizer ? avatarImgOrInitials(d.organizer.avatar_url, d.organizer.display_name, 'avatar-sm') : '';
+      const orgName = d.organizer ? `<span class="organizer-name">by <strong>${esc(d.organizer.display_name)}</strong></span>` : '';
+
+      const schoolBadge = d.school ? `<span class="school-badge">${esc(d.school)}</span>` : '';
+
+      render(`<div class="preview-outer"><div class="preview-card">
+        <div class="card-accent" style="background:${esc(accentColor)}"></div>
+        <div class="card-body">
+          <div class="badge-row">
+            <span class="type-badge">Group</span>
+            ${schoolBadge}
+          </div>
+          <h1 class="preview-title">${esc(d.name)}</h1>
+          ${orgAvatar || orgName ? `<div class="organizer-row">${orgAvatar}${orgName}</div>` : ''}
+          ${memberHtml}
+        </div>
+        ${COMING_SOON}
+      </div></div>`);
+    }
+
+    function renderBar(d) {
+      setTitle(d.name);
+      const typeLabel = fmtBarType(d.bar_type);
+      render(`<div class="preview-outer"><div class="preview-card">
+        <div class="card-accent" style="background:var(--amber)"></div>
+        <div class="card-body">
+          <div class="badge-row">
+            <span class="type-badge">Bar</span>
+          </div>
+          <h1 class="preview-title">${esc(d.name)}</h1>
+          ${d.neighborhood ? `<p class="bar-neighborhood">${esc(d.neighborhood)}</p>` : ''}
+          ${d.address ? `<p class="bar-address">${esc(d.address)}</p>` : ''}
+          ${typeLabel ? `<div class="bar-type-chip">${esc(typeLabel)}</div>` : ''}
+        </div>
+        ${COMING_SOON}
+      </div></div>`);
+    }
+
+    function renderUser(d) {
+      setTitle('@' + d.username);
+      const avatarHtml = avatarImgOrInitials(d.avatar_url, d.display_name, 'avatar-lg');
+      const schoolHtml = d.school ? `<div class="user-school">${esc(d.school)}</div>` : '';
+      render(`<div class="preview-outer"><div class="preview-card">
+        <div class="card-body user-card">
+          ${avatarHtml}
+          <h1 class="preview-title">${esc(d.display_name)}</h1>
+          <p class="user-handle">@${esc(d.username)}</p>
+          ${schoolHtml}
+          <div class="card-rule" style="margin-top:16px"></div>
+          <p class="private-msg" style="font-size:14px">Get the app to see their nights out.</p>
+        </div>
+        ${COMING_SOON}
+      </div></div>`);
+    }
+
+    // ─── Router ─────────────────────────────────────────────────────────────
+    (async function main() {
+      // On localhost, support ?type=c&id=uuid to test without a real 404
+      const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
+      let parsedPath = location.pathname;
+      if (isLocal) {
+        const p = new URLSearchParams(location.search);
+        if (p.get('type') && p.get('id')) parsedPath = '/' + p.get('type') + '/' + p.get('id');
+      }
+
+      const match = parsedPath.match(/^\/(c|g|b|u)\/([^/?#]+)/);
+      if (!match) { render404(); return; }
+
+      const [, type, id] = match;
+
+      const client = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+      let result;
+      try {
+        if (type === 'c') result = await client.rpc('get_crawl_preview', { p_crawl_id: id });
+        if (type === 'g') result = await client.rpc('get_group_preview', { group_id: id });
+        if (type === 'b') result = await client.rpc('get_bar_preview',   { bar_id:   id });
+        if (type === 'u') result = await client.rpc('get_user_preview',  { p_username: id });
+      } catch {
+        renderError();
+        return;
+      }
+
+      const { data, error } = result || {};
+
+      if (error) {
+        // 22P02 = invalid UUID input — treat as not-found, not a crash
+        if (error.code === '22P02') { renderNotFound(type); return; }
+        renderError();
+        return;
+      }
+
+      if (!data) { renderNotFound(type); return; }
+
+      if (type === 'c') { data.is_private ? renderPrivateCrawl(data) : renderCrawl(data); return; }
+      if (type === 'g') { data.is_private ? renderPrivateGroup(data) : renderGroup(data); return; }
+      if (type === 'b') { renderBar(data); return; }
+      if (type === 'u') { renderUser(data); return; }
+    })();
+  </script>
+</body>
+</html>

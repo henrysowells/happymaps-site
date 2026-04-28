@@ -4,19 +4,19 @@
   "rewrites": [
     {
       "source": "/b/(.*)",
-      "destination": "/404.html"
+      "destination": "/preview.html"
     },
     {
       "source": "/u/(.*)",
-      "destination": "/404.html"
+      "destination": "/preview.html"
     },
     {
       "source": "/g/(.*)",
-      "destination": "/404.html"
+      "destination": "/preview.html"
     },
     {
       "source": "/c/(.*)",
-      "destination": "/404.html"
+      "destination": "/preview.html"
     }
   ]
 }
