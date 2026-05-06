@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Venues — HappyMaps Admin</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#FFB300" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/admin.css" />
+</head>
+<body>
+  <div class="admin-shell">
+    <nav class="admin-nav">
+      <div class="admin-nav-inner">
+        <a href="/admin/approvals.html" class="admin-logo">
+          <img src="/assets/images/HappyMapsAppIcon.png" alt="" />
+          <span>HappyMaps Admin</span>
+        </a>
+        <div class="admin-nav-links">
+          <a href="/admin/approvals.html">Approvals</a>
+          <a href="/admin/audit.html">Audit</a>
+          <a href="/admin/venues.html">Venues</a>
+        </div>
+        <div class="admin-nav-spacer"></div>
+        <button id="sign-out-btn" type="button">Sign out</button>
+      </div>
+    </nav>
+
+    <main class="admin-main">
+      <div class="page-header">
+        <h1 class="page-title">Venues</h1>
+        <span id="count" class="page-subtitle"></span>
+      </div>
+
+      <div id="banner" class="banner banner-error" role="alert"></div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Venue accounts</span>
+        </div>
+        <div id="content">
+          <div class="loading"><span class="spinner"></span>Loading…</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import {
+      supabase, requireAdmin, initAdminNav,
+      escapeHtml, formatDateOnly,
+      showBanner, clearBanner,
+    } from '/admin/admin.js';
+
+    const contentEl = document.getElementById('content');
+    const countEl   = document.getElementById('count');
+
+    async function load() {
+      clearBanner();
+      contentEl.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>';
+
+      // 1. Venue accounts (gated by users_admin_select_venues — role='venue').
+      const { data: venues, error: venuesErr } = await supabase
+        .from('users')
+        .select('id, email, tier, venue_bar_id, bar:bars(id, name, neighborhood)')
+        .eq('role', 'venue')
+        .order('email');
+
+      if (venuesErr) {
+        contentEl.innerHTML = '';
+        showBanner(`Failed to load venues: ${venuesErr.message}`);
+        return;
+      }
+
+      // 2. Approved-event aggregates per bar — fetch once, count + max(date)
+      // client-side. PostgREST has no GROUP BY, and the dataset is small.
+      const barIds = venues.map(v => v.bar?.id).filter(Boolean);
+      const aggMap = new Map();
+      if (barIds.length > 0) {
+        const { data: events, error: evErr } = await supabase
+          .from('events')
+          .select('bar_id, event_date')
+          .in('bar_id', barIds)
+          .eq('status', 'approved');
+        if (evErr) {
+          showBanner(`Loaded venues but failed to load event aggregates: ${evErr.message}`);
+        } else {
+          for (const ev of events) {
+            const cur = aggMap.get(ev.bar_id) || { count: 0, lastDate: null };
+            cur.count += 1;
+            if (!cur.lastDate || ev.event_date > cur.lastDate) cur.lastDate = ev.event_date;
+            aggMap.set(ev.bar_id, cur);
+          }
+        }
+      }
+
+      countEl.textContent = `${venues.length} venue${venues.length === 1 ? '' : 's'}`;
+
+      if (venues.length === 0) {
+        contentEl.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-title">No venue accounts yet.</div>
+            <div>Once venues sign up, they'll appear here.</div>
+          </div>`;
+        return;
+      }
+
+      contentEl.innerHTML = `
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Bar</th>
+                <th>Email</th>
+                <th>Tier</th>
+                <th>Approved events</th>
+                <th>Last event</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${venues.map((v) => {
+                const agg = aggMap.get(v.bar?.id) || { count: 0, lastDate: null };
+                const tier = v.tier || 'free';
+                return `
+                  <tr>
+                    <td>
+                      <div class="cell-stack">
+                        <span class="cell-strong">${escapeHtml(v.bar?.name || '— no bar linked —')}</span>
+                        ${v.bar?.neighborhood ? `<span class="cell-stack-sub">${escapeHtml(v.bar.neighborhood)}</span>` : ''}
+                      </div>
+                    </td>
+                    <td class="cell-muted cell-mono">${escapeHtml(v.email || '—')}</td>
+                    <td><span class="badge badge-tier-${escapeHtml(tier)}">${escapeHtml(tier)}</span></td>
+                    <td class="cell-mono">${agg.count}</td>
+                    <td class="cell-muted cell-mono">${escapeHtml(agg.lastDate ? formatDateOnly(agg.lastDate) : 'None')}</td>
+                  </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    (async () => {
+      const admin = await requireAdmin();
+      if (!admin) return;
+      initAdminNav();
+      await load();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Approvals — HappyMaps Admin</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#FFB300" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/admin.css" />
+</head>
+<body>
+  <div class="admin-shell">
+    <nav class="admin-nav">
+      <div class="admin-nav-inner">
+        <a href="/admin/approvals.html" class="admin-logo">
+          <img src="/assets/images/HappyMapsAppIcon.png" alt="" />
+          <span>HappyMaps Admin</span>
+        </a>
+        <div class="admin-nav-links">
+          <a href="/admin/approvals.html">Approvals</a>
+          <a href="/admin/audit.html">Audit</a>
+          <a href="/admin/venues.html">Venues</a>
+        </div>
+        <div class="admin-nav-spacer"></div>
+        <button id="sign-out-btn" type="button">Sign out</button>
+      </div>
+    </nav>
+
+    <main class="admin-main">
+      <div class="page-header">
+        <h1 class="page-title">Approvals</h1>
+        <span id="count" class="page-subtitle"></span>
+      </div>
+
+      <div id="banner" class="banner banner-error" role="alert"></div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Pending events</span>
+        </div>
+        <div id="content">
+          <div class="loading"><span class="spinner"></span>Loading…</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import {
+      supabase, requireAdmin, initAdminNav,
+      escapeHtml, formatRelativeTime, formatEventDate,
+      showToast, showBanner, clearBanner,
+    } from '/admin/admin.js';
+
+    const REJECT_CATEGORIES = [
+      { value: 'inappropriate',  label: 'Inappropriate' },
+      { value: 'duplicate',      label: 'Duplicate' },
+      { value: 'incorrect_info', label: 'Incorrect info' },
+      { value: 'spam',           label: 'Spam' },
+      { value: 'other',          label: 'Other (specify)' },
+    ];
+
+    const contentEl = document.getElementById('content');
+    const countEl = document.getElementById('count');
+
+    async function load() {
+      clearBanner();
+      contentEl.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>';
+
+      const { data, error } = await supabase
+        .from('events')
+        .select('id, name, description, event_date, start_time, end_time, created_at, bar_id, bar:bars(name, neighborhood)')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        contentEl.innerHTML = '';
+        showBanner(`Failed to load pending events: ${error.message}`);
+        countEl.textContent = '';
+        return;
+      }
+
+      countEl.textContent = data.length === 0
+        ? 'All caught up'
+        : `${data.length} pending`;
+
+      if (data.length === 0) {
+        contentEl.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-title">No events to review.</div>
+            <div>You're all caught up.</div>
+          </div>`;
+        return;
+      }
+
+      contentEl.innerHTML = `
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Bar</th>
+                <th>Event</th>
+                <th>When</th>
+                <th>Submitted</th>
+                <th class="col-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.map(renderRow).join('')}
+            </tbody>
+          </table>
+        </div>`;
+
+      data.forEach(wireRow);
+    }
+
+    function renderRow(ev) {
+      const barName = ev.bar?.name || '—';
+      const neighborhood = ev.bar?.neighborhood || '';
+      const description = ev.description ? `<div class="cell-stack-sub">${escapeHtml(ev.description)}</div>` : '';
+      return `
+        <tr data-event-id="${ev.id}">
+          <td>
+            <div class="cell-stack">
+              <span class="cell-strong">${escapeHtml(barName)}</span>
+              ${neighborhood ? `<span class="cell-stack-sub">${escapeHtml(neighborhood)}</span>` : ''}
+            </div>
+          </td>
+          <td>
+            <div class="cell-stack">
+              <span class="cell-strong">${escapeHtml(ev.name)}</span>
+              ${description}
+            </div>
+          </td>
+          <td class="cell-mono">${escapeHtml(formatEventDate(ev.event_date, ev.start_time, ev.end_time))}</td>
+          <td class="cell-muted">${escapeHtml(formatRelativeTime(ev.created_at))}</td>
+          <td class="col-actions">
+            <div class="btn-row">
+              <button class="btn btn-primary btn-sm" data-action="approve">Approve</button>
+              <button class="btn btn-destructive btn-sm" data-action="reject">Reject</button>
+            </div>
+          </td>
+        </tr>
+        <tr class="reject-form-row" data-reject-form-for="${ev.id}" hidden>
+          <td colspan="5">
+            <form class="reject-form" data-event-id="${ev.id}">
+              <div class="reject-form-controls">
+                <div class="field">
+                  <label class="label">Reason category</label>
+                  <select class="select" name="category" required>
+                    ${REJECT_CATEGORIES.map(c => `<option value="${c.value}">${c.label}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="field" style="flex: 2; min-width: 260px;">
+                  <label class="label">Detail (required if "Other")</label>
+                  <input class="input" name="text" type="text" maxlength="500" placeholder="Optional context for the venue" />
+                </div>
+              </div>
+              <div class="btn-row">
+                <button type="submit" class="btn btn-destructive btn-sm">Confirm rejection</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-action="cancel-reject">Cancel</button>
+              </div>
+              <div class="error-msg" data-reject-error></div>
+            </form>
+          </td>
+        </tr>`;
+    }
+
+    function wireRow(ev) {
+      const row = document.querySelector(`tr[data-event-id="${ev.id}"]`);
+      const formRow = document.querySelector(`tr[data-reject-form-for="${ev.id}"]`);
+      if (!row || !formRow) return;
+
+      const approveBtn = row.querySelector('button[data-action="approve"]');
+      const rejectBtn = row.querySelector('button[data-action="reject"]');
+      const cancelBtn = formRow.querySelector('button[data-action="cancel-reject"]');
+      const form = formRow.querySelector('form');
+
+      approveBtn.addEventListener('click', () => approveEvent(ev, approveBtn, rejectBtn));
+      rejectBtn.addEventListener('click', () => { formRow.hidden = false; });
+      cancelBtn.addEventListener('click', () => { formRow.hidden = true; });
+      form.addEventListener('submit', (e) => { e.preventDefault(); rejectEvent(ev, form); });
+    }
+
+    async function approveEvent(ev, approveBtn, rejectBtn) {
+      approveBtn.disabled = true;
+      rejectBtn.disabled = true;
+      approveBtn.textContent = 'Approving…';
+      const { error } = await supabase.rpc('approve_event', { p_event_id: ev.id });
+      if (error) {
+        approveBtn.disabled = false;
+        rejectBtn.disabled = false;
+        approveBtn.textContent = 'Approve';
+        showToast(error.message || 'Approve failed', 'error');
+        return;
+      }
+      showToast(`Approved: ${ev.name}`, 'success');
+      load();
+    }
+
+    async function rejectEvent(ev, form) {
+      const errEl = form.querySelector('[data-reject-error]');
+      errEl.textContent = '';
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const category = form.elements.category.value;
+      const text = form.elements.text.value.trim();
+
+      if (category === 'other' && !text) {
+        errEl.textContent = 'Detail is required when category is "Other".';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Rejecting…';
+
+      const { error } = await supabase.rpc('reject_event', {
+        p_event_id: ev.id,
+        p_reason_category: category,
+        p_reason_text: text || null,
+      });
+
+      if (error) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Confirm rejection';
+        errEl.textContent = error.message || 'Reject failed';
+        return;
+      }
+
+      showToast(`Rejected: ${ev.name}`, 'success');
+      load();
+    }
+
+    (async () => {
+      const admin = await requireAdmin();
+      if (!admin) return;
+      initAdminNav();
+      await load();
+    })();
+  </script>
+</body>
+</html>

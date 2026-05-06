@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in — HappyMaps Admin</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#FFB300" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/admin.css" />
+</head>
+<body>
+  <div class="login-shell">
+    <div class="login-card">
+      <div class="login-brand">
+        <img src="/assets/images/HappyMapsAppIcon.png" alt="" />
+        <span>HappyMaps</span>
+      </div>
+      <h1 class="login-title">Admin sign in</h1>
+      <p class="login-subtitle">Internal use only.</p>
+
+      <form id="login-form" class="login-form" autocomplete="on">
+        <div class="field">
+          <label class="label" for="email">Email</label>
+          <input id="email" name="email" class="input" type="email" required autocomplete="username" />
+        </div>
+        <div class="field">
+          <label class="label" for="password">Password</label>
+          <input id="password" name="password" class="input" type="password" required autocomplete="current-password" />
+        </div>
+        <button id="submit-btn" class="btn btn-primary" type="submit">Sign in</button>
+        <div id="error" class="error-msg" role="alert" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase } from '/admin/admin.js';
+
+    const form = document.getElementById('login-form');
+    const emailEl = document.getElementById('email');
+    const passwordEl = document.getElementById('password');
+    const submitBtn = document.getElementById('submit-btn');
+    const errorEl = document.getElementById('error');
+
+    // Surface the redirect-from-protected-page error.
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error') === 'not_admin') {
+      errorEl.textContent = 'This account is not authorized for the admin panel.';
+    }
+
+    // If already signed in as admin, skip the form.
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data: user } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+      if (user && user.role === 'admin') {
+        window.location.href = '/admin/approvals.html';
+      }
+    })();
+
+    function setError(msg) {
+      errorEl.textContent = msg || '';
+    }
+
+    function setBusy(busy) {
+      submitBtn.disabled = busy;
+      submitBtn.textContent = busy ? 'Signing in…' : 'Sign in';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setError('');
+      setBusy(true);
+
+      const email = emailEl.value.trim();
+      const password = passwordEl.value;
+
+      const { data: signIn, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInErr || !signIn.session) {
+        setBusy(false);
+        setError(signInErr?.message || 'Sign-in failed.');
+        return;
+      }
+
+      const { data: user, error: userErr } = await supabase
+        .from('users')
+        .select('id, role')
+        .eq('id', signIn.session.user.id)
+        .single();
+
+      if (userErr || !user || user.role !== 'admin') {
+        await supabase.auth.signOut();
+        setBusy(false);
+        setError('This account is not authorized for the admin panel.');
+        return;
+      }
+
+      window.location.href = '/admin/approvals.html';
+    });
+  </script>
+</body>
+</html>

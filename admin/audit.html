@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Audit log — HappyMaps Admin</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#FFB300" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/admin.css" />
+</head>
+<body>
+  <div class="admin-shell">
+    <nav class="admin-nav">
+      <div class="admin-nav-inner">
+        <a href="/admin/approvals.html" class="admin-logo">
+          <img src="/assets/images/HappyMapsAppIcon.png" alt="" />
+          <span>HappyMaps Admin</span>
+        </a>
+        <div class="admin-nav-links">
+          <a href="/admin/approvals.html">Approvals</a>
+          <a href="/admin/audit.html">Audit</a>
+          <a href="/admin/venues.html">Venues</a>
+        </div>
+        <div class="admin-nav-spacer"></div>
+        <button id="sign-out-btn" type="button">Sign out</button>
+      </div>
+    </nav>
+
+    <main class="admin-main">
+      <div class="page-header">
+        <h1 class="page-title">Audit log</h1>
+        <span id="page-info" class="page-subtitle"></span>
+      </div>
+
+      <div id="banner" class="banner banner-error" role="alert"></div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Filters</span>
+        </div>
+        <div class="filter-row">
+          <div class="field">
+            <label class="label" for="filter-action">Action</label>
+            <select id="filter-action" class="select">
+              <option value="">All</option>
+              <option value="approve">Approve</option>
+              <option value="reject">Reject</option>
+              <option value="create">Create</option>
+              <option value="update">Update</option>
+              <option value="delete">Delete</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label" for="filter-resource">Resource</label>
+            <select id="filter-resource" class="select">
+              <option value="">All</option>
+              <option value="event">event</option>
+              <option value="event_status">event_status</option>
+              <option value="happy_hour">happy_hour</option>
+              <option value="bar">bar</option>
+            </select>
+          </div>
+          <div class="field">
+            <button id="refresh" type="button" class="btn btn-secondary">Refresh</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div id="content">
+          <div class="loading"><span class="spinner"></span>Loading…</div>
+        </div>
+        <div class="pagination" id="pagination" hidden>
+          <span id="page-status"></span>
+          <div class="pagination-controls">
+            <button id="prev" class="btn btn-secondary btn-sm" type="button">Previous</button>
+            <button id="next" class="btn btn-secondary btn-sm" type="button">Next</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import {
+      supabase, requireAdmin, initAdminNav,
+      escapeHtml, formatRelativeTime, formatAbsoluteTime,
+      showBanner, clearBanner,
+    } from '/admin/admin.js';
+
+    const PAGE_SIZE = 50;
+
+    const contentEl  = document.getElementById('content');
+    const paginEl    = document.getElementById('pagination');
+    const pageStatus = document.getElementById('page-status');
+    const prevBtn    = document.getElementById('prev');
+    const nextBtn    = document.getElementById('next');
+    const actionSel  = document.getElementById('filter-action');
+    const resSel     = document.getElementById('filter-resource');
+    const refreshBtn = document.getElementById('refresh');
+
+    let page = 0;
+    let pageHasMore = false;
+
+    async function load() {
+      clearBanner();
+      contentEl.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>';
+      paginEl.hidden = true;
+
+      // Fetch one extra to detect a next page.
+      const from = page * PAGE_SIZE;
+      const to   = from + PAGE_SIZE;
+
+      let query = supabase
+        .from('audit_log')
+        .select('id, created_at, actor_id, actor_role, resource_type, resource_id, action, before, after, reason, bar_id, actor:users(email), bar:bars(name)')
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+      const action = actionSel.value;
+      const res    = resSel.value;
+      if (action) query = query.eq('action', action);
+      if (res)    query = query.eq('resource_type', res);
+
+      const { data, error } = await query;
+      if (error) {
+        contentEl.innerHTML = '';
+        showBanner(`Failed to load audit log: ${error.message}`);
+        return;
+      }
+
+      pageHasMore = data.length > PAGE_SIZE;
+      const rows = pageHasMore ? data.slice(0, PAGE_SIZE) : data;
+
+      if (rows.length === 0) {
+        contentEl.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-title">No entries match.</div>
+            <div>Try clearing the filters or come back after some activity.</div>
+          </div>`;
+        return;
+      }
+
+      contentEl.innerHTML = `
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>When</th>
+                <th>Actor</th>
+                <th>Action</th>
+                <th>Resource</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>${rows.map(renderRow).join('')}</tbody>
+          </table>
+        </div>`;
+
+      paginEl.hidden = false;
+      pageStatus.textContent = `Page ${page + 1} · ${rows.length} entries`;
+      prevBtn.disabled = page === 0;
+      nextBtn.disabled = !pageHasMore;
+    }
+
+    function renderActor(row) {
+      if (row.actor_role === 'admin') return 'admin';
+      if (row.actor?.email) return row.actor.email;
+      // Venue actors will show via users_admin_select_venues; if missing, fall back
+      // to the actor_id (truncated) so the row isn't blank.
+      return row.actor_id ? row.actor_id.slice(0, 8) + '…' : '—';
+    }
+
+    function renderResource(row) {
+      const barName = row.bar?.name;
+      const beforeName = row.before?.name;
+      const afterName  = row.after?.name;
+      const label = afterName || beforeName || barName || '';
+      const labelHtml = label ? `<span class="cell-stack-sub">${escapeHtml(label)}</span>` : '';
+      return `
+        <div class="cell-stack">
+          <span class="cell-strong cell-mono">${escapeHtml(row.resource_type)}</span>
+          ${labelHtml}
+        </div>`;
+    }
+
+    function renderDetails(row) {
+      const r = row.resource_type;
+      const a = row.action;
+      const barName = row.bar?.name || '';
+
+      if (r === 'event_status' && a === 'approve') {
+        const beforeStatus = row.before?.status || '?';
+        const afterStatus  = row.after?.status  || '?';
+        return `${escapeHtml(barName)} → ${escapeHtml(beforeStatus)} → <span class="cell-strong">${escapeHtml(afterStatus)}</span>`;
+      }
+      if (r === 'event_status' && a === 'reject') {
+        const reason = row.reason || row.after?.rejection_reason || '';
+        return `${escapeHtml(barName)} → <span class="cell-strong">rejected</span>${reason ? `: ${escapeHtml(reason)}` : ''}`;
+      }
+      if (r === 'event' && a === 'create') {
+        return `Created event: ${escapeHtml(row.after?.name || '')}`;
+      }
+      if (r === 'event' && a === 'update') {
+        return `Updated event: ${escapeHtml(row.after?.name || row.before?.name || '')}`;
+      }
+      if (r === 'event' && a === 'delete') {
+        return `Deleted event: ${escapeHtml(row.before?.name || '')}`;
+      }
+      if (r === 'happy_hour' && a === 'update') {
+        return `Updated happy hour for ${escapeHtml(barName) || '—'}`;
+      }
+      if (r === 'bar' && a === 'update') {
+        return `Updated bar info for ${escapeHtml(barName) || '—'}`;
+      }
+      return `${escapeHtml(r)} / ${escapeHtml(a)}`;
+    }
+
+    function renderRow(row) {
+      return `
+        <tr>
+          <td title="${escapeHtml(formatAbsoluteTime(row.created_at))}" class="cell-muted cell-mono">${escapeHtml(formatRelativeTime(row.created_at))}</td>
+          <td class="cell-muted">${escapeHtml(renderActor(row))}</td>
+          <td><span class="badge badge-action-${escapeHtml(row.action)}">${escapeHtml(row.action)}</span></td>
+          <td>${renderResource(row)}</td>
+          <td>${renderDetails(row)}</td>
+        </tr>`;
+    }
+
+    actionSel.addEventListener('change', () => { page = 0; load(); });
+    resSel.addEventListener('change',    () => { page = 0; load(); });
+    refreshBtn.addEventListener('click', () => { load(); });
+    prevBtn.addEventListener('click', () => { if (page > 0) { page--; load(); } });
+    nextBtn.addEventListener('click', () => { if (pageHasMore) { page++; load(); } });
+
+    (async () => {
+      const admin = await requireAdmin();
+      if (!admin) return;
+      initAdminNav();
+      await load();
+    })();
+  </script>
+</body>
+</html>
