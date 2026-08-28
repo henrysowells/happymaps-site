@@ -46,7 +46,16 @@
         <div class="card-header">
           <span class="card-title">Pending events</span>
         </div>
-        <div id="content">
+        <div id="content-events">
+          <div class="loading"><span class="spinner"></span>Loading…</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 24px;">
+        <div class="card-header">
+          <span class="card-title">Pending promotions</span>
+        </div>
+        <div id="content-promotions">
           <div class="loading"><span class="spinner"></span>Loading…</div>
         </div>
       </div>
@@ -68,80 +77,132 @@
       { value: 'other',          label: 'Other (specify)' },
     ];
 
-    const contentEl = document.getElementById('content');
     const countEl = document.getElementById('count');
+    const pendingCounts = { events: 0, promotions: 0 };
 
-    async function load() {
-      clearBanner();
-      contentEl.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>';
+    function updateCount() {
+      const total = pendingCounts.events + pendingCounts.promotions;
+      countEl.textContent = total === 0 ? 'All caught up' : `${total} pending`;
+    }
 
-      const { data, error } = await supabase
-        .from('events')
-        .select('id, name, description, event_date, start_time, end_time, created_at, bar_id, bar:bars(name, neighborhood)')
-        .eq('status', 'pending')
-        .order('created_at', { ascending: true });
+    // "Aug 28" / "Aug 28 – Sep 30"
+    function formatDateRange(startsOn, endsOn) {
+      const md = (ymd) => {
+        const [y, m, d] = ymd.split('-').map(Number);
+        return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+      };
+      return startsOn === endsOn ? `${md(startsOn)} only` : `${md(startsOn)} – ${md(endsOn)}`;
+    }
 
+    // One queue definition per moderated table. Both share the row chrome,
+    // the reject form, and the approve/reject wiring; only the query, the
+    // RPC names, and the middle columns differ.
+    const QUEUES = {
+      events: {
+        key: 'events',
+        contentEl: document.getElementById('content-events'),
+        noun: 'event',
+        emptyTitle: 'No events to review.',
+        columns: ['Bar', 'Event', 'When', 'Submitted'],
+        approveRpc: 'approve_event',
+        rejectRpc:  'reject_event',
+        idParam:    'p_event_id',
+        query: () => supabase
+          .from('events')
+          .select('id, name, description, event_date, start_time, end_time, created_at, bar_id, bar:bars(name, neighborhood)')
+          .eq('status', 'pending')
+          .order('created_at', { ascending: true }),
+        nameOf: (r) => r.name,
+        cells: (r) => [
+          `<div class="cell-stack">
+             <span class="cell-strong">${escapeHtml(r.name)}</span>
+             ${r.description ? `<div class="cell-stack-sub">${escapeHtml(r.description)}</div>` : ''}
+           </div>`,
+          `<span class="cell-mono">${escapeHtml(formatEventDate(r.event_date, r.start_time, r.end_time))}</span>`,
+        ],
+      },
+      promotions: {
+        key: 'promotions',
+        contentEl: document.getElementById('content-promotions'),
+        noun: 'promotion',
+        emptyTitle: 'No promotions to review.',
+        columns: ['Bar', 'Offer', 'Runs', 'Submitted'],
+        approveRpc: 'approve_promotion',
+        rejectRpc:  'reject_promotion',
+        idParam:    'p_promotion_id',
+        query: () => supabase
+          .from('promotions')
+          .select('id, title, details, starts_on, ends_on, created_at, bar_id, bar:bars(name, neighborhood)')
+          .eq('status', 'pending')
+          .order('created_at', { ascending: true }),
+        nameOf: (r) => r.title,
+        cells: (r) => [
+          `<div class="cell-stack">
+             <span class="cell-strong">${escapeHtml(r.title)}</span>
+             ${r.details ? `<div class="cell-stack-sub">${escapeHtml(r.details)}</div>` : ''}
+           </div>`,
+          `<span class="cell-mono">${escapeHtml(formatDateRange(r.starts_on, r.ends_on))}</span>`,
+        ],
+      },
+    };
+
+    async function loadQueue(q) {
+      q.contentEl.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>';
+
+      const { data, error } = await q.query();
       if (error) {
-        contentEl.innerHTML = '';
-        showBanner(`Failed to load pending events: ${error.message}`);
-        countEl.textContent = '';
+        q.contentEl.innerHTML = '';
+        showBanner(`Failed to load pending ${q.noun}s: ${error.message}`);
+        pendingCounts[q.key] = 0;
+        updateCount();
         return;
       }
 
-      countEl.textContent = data.length === 0
-        ? 'All caught up'
-        : `${data.length} pending`;
+      pendingCounts[q.key] = data.length;
+      updateCount();
 
       if (data.length === 0) {
-        contentEl.innerHTML = `
+        q.contentEl.innerHTML = `
           <div class="empty-state">
-            <div class="empty-state-title">No events to review.</div>
+            <div class="empty-state-title">${q.emptyTitle}</div>
             <div>You're all caught up.</div>
           </div>`;
         return;
       }
 
-      contentEl.innerHTML = `
+      q.contentEl.innerHTML = `
         <div class="table-wrap">
           <table class="data-table">
             <thead>
               <tr>
-                <th>Bar</th>
-                <th>Event</th>
-                <th>When</th>
-                <th>Submitted</th>
+                ${q.columns.map(c => `<th>${c}</th>`).join('')}
                 <th class="col-actions">Actions</th>
               </tr>
             </thead>
             <tbody>
-              ${data.map(renderRow).join('')}
+              ${data.map(r => renderRow(q, r)).join('')}
             </tbody>
           </table>
         </div>`;
 
-      data.forEach(wireRow);
+      data.forEach(r => wireRow(q, r));
     }
 
-    function renderRow(ev) {
-      const barName = ev.bar?.name || '—';
-      const neighborhood = ev.bar?.neighborhood || '';
-      const description = ev.description ? `<div class="cell-stack-sub">${escapeHtml(ev.description)}</div>` : '';
+    function renderRow(q, r) {
+      const barName = r.bar?.name || '—';
+      const neighborhood = r.bar?.neighborhood || '';
+      const [primaryCell, whenCell] = q.cells(r);
       return `
-        <tr data-event-id="${ev.id}">
+        <tr data-row-id="${q.key}:${r.id}">
           <td>
             <div class="cell-stack">
               <span class="cell-strong">${escapeHtml(barName)}</span>
               ${neighborhood ? `<span class="cell-stack-sub">${escapeHtml(neighborhood)}</span>` : ''}
             </div>
           </td>
-          <td>
-            <div class="cell-stack">
-              <span class="cell-strong">${escapeHtml(ev.name)}</span>
-              ${description}
-            </div>
-          </td>
-          <td class="cell-mono">${escapeHtml(formatEventDate(ev.event_date, ev.start_time, ev.end_time))}</td>
-          <td class="cell-muted">${escapeHtml(formatRelativeTime(ev.created_at))}</td>
+          <td>${primaryCell}</td>
+          <td>${whenCell}</td>
+          <td class="cell-muted">${escapeHtml(formatRelativeTime(r.created_at))}</td>
           <td class="col-actions">
             <div class="btn-row">
               <button class="btn btn-primary btn-sm" data-action="approve">Approve</button>
@@ -149,9 +210,9 @@
             </div>
           </td>
         </tr>
-        <tr class="reject-form-row" data-reject-form-for="${ev.id}" hidden>
+        <tr class="reject-form-row" data-reject-form-for="${q.key}:${r.id}" hidden>
           <td colspan="5">
-            <form class="reject-form" data-event-id="${ev.id}">
+            <form class="reject-form">
               <div class="reject-form-controls">
                 <div class="field">
                   <label class="label">Reason category</label>
@@ -174,9 +235,9 @@
         </tr>`;
     }
 
-    function wireRow(ev) {
-      const row = document.querySelector(`tr[data-event-id="${ev.id}"]`);
-      const formRow = document.querySelector(`tr[data-reject-form-for="${ev.id}"]`);
+    function wireRow(q, r) {
+      const row = document.querySelector(`tr[data-row-id="${q.key}:${r.id}"]`);
+      const formRow = document.querySelector(`tr[data-reject-form-for="${q.key}:${r.id}"]`);
       if (!row || !formRow) return;
 
       const approveBtn = row.querySelector('button[data-action="approve"]');
@@ -184,17 +245,17 @@
       const cancelBtn = formRow.querySelector('button[data-action="cancel-reject"]');
       const form = formRow.querySelector('form');
 
-      approveBtn.addEventListener('click', () => approveEvent(ev, approveBtn, rejectBtn));
+      approveBtn.addEventListener('click', () => approveRow(q, r, approveBtn, rejectBtn));
       rejectBtn.addEventListener('click', () => { formRow.hidden = false; });
       cancelBtn.addEventListener('click', () => { formRow.hidden = true; });
-      form.addEventListener('submit', (e) => { e.preventDefault(); rejectEvent(ev, form); });
+      form.addEventListener('submit', (e) => { e.preventDefault(); rejectRow(q, r, form); });
     }
 
-    async function approveEvent(ev, approveBtn, rejectBtn) {
+    async function approveRow(q, r, approveBtn, rejectBtn) {
       approveBtn.disabled = true;
       rejectBtn.disabled = true;
       approveBtn.textContent = 'Approving…';
-      const { error } = await supabase.rpc('approve_event', { p_event_id: ev.id });
+      const { error } = await supabase.rpc(q.approveRpc, { [q.idParam]: r.id });
       if (error) {
         approveBtn.disabled = false;
         rejectBtn.disabled = false;
@@ -202,11 +263,11 @@
         showToast(error.message || 'Approve failed', 'error');
         return;
       }
-      showToast(`Approved: ${ev.name}`, 'success');
-      load();
+      showToast(`Approved: ${q.nameOf(r)}`, 'success');
+      loadQueue(q);
     }
 
-    async function rejectEvent(ev, form) {
+    async function rejectRow(q, r, form) {
       const errEl = form.querySelector('[data-reject-error]');
       errEl.textContent = '';
       const submitBtn = form.querySelector('button[type="submit"]');
@@ -221,8 +282,8 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Rejecting…';
 
-      const { error } = await supabase.rpc('reject_event', {
-        p_event_id: ev.id,
+      const { error } = await supabase.rpc(q.rejectRpc, {
+        [q.idParam]: r.id,
         p_reason_category: category,
         p_reason_text: text || null,
       });
@@ -234,8 +295,13 @@
         return;
       }
 
-      showToast(`Rejected: ${ev.name}`, 'success');
-      load();
+      showToast(`Rejected: ${q.nameOf(r)}`, 'success');
+      loadQueue(q);
+    }
+
+    async function load() {
+      clearBanner();
+      await Promise.all([loadQueue(QUEUES.events), loadQueue(QUEUES.promotions)]);
     }
 
     (async () => {

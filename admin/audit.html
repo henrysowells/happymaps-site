@@ -64,6 +64,8 @@
               <option value="">All</option>
               <option value="event">event</option>
               <option value="event_status">event_status</option>
+              <option value="promotion">promotion</option>
+              <option value="promotion_status">promotion_status</option>
               <option value="happy_hour">happy_hour</option>
               <option value="bar">bar</option>
             </select>
@@ -197,12 +199,13 @@
       const a = row.action;
       const barName = row.bar?.name || '';
 
-      if (r === 'event_status' && a === 'approve') {
+      // event_status and promotion_status carry the same before/after shape.
+      if ((r === 'event_status' || r === 'promotion_status') && a === 'approve') {
         const beforeStatus = row.before?.status || '?';
         const afterStatus  = row.after?.status  || '?';
         return `${escapeHtml(barName)} → ${escapeHtml(beforeStatus)} → <span class="cell-strong">${escapeHtml(afterStatus)}</span>`;
       }
-      if (r === 'event_status' && a === 'reject') {
+      if ((r === 'event_status' || r === 'promotion_status') && a === 'reject') {
         const reason = row.reason || row.after?.rejection_reason || '';
         return `${escapeHtml(barName)} → <span class="cell-strong">rejected</span>${reason ? `: ${escapeHtml(reason)}` : ''}`;
       }
@@ -214,6 +217,15 @@
       }
       if (r === 'event' && a === 'delete') {
         return `Deleted event: ${escapeHtml(row.before?.name || '')}`;
+      }
+      if (r === 'promotion' && a === 'create') {
+        return `Created promotion: ${escapeHtml(row.after?.title || '')}`;
+      }
+      if (r === 'promotion' && a === 'update') {
+        return `Updated promotion: ${escapeHtml(row.after?.title || row.before?.title || '')}`;
+      }
+      if (r === 'promotion' && a === 'delete') {
+        return `Deleted promotion: ${escapeHtml(row.before?.title || '')}`;
       }
       if (r === 'happy_hour' && a === 'update') {
         return `Updated happy hour for ${escapeHtml(barName) || '—'}`;
